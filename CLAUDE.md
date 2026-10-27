@@ -4,6 +4,7 @@ Before writing or changing code in this repo, read:
 
 1. **`docs/vision.md`** — what this product is and why. Shapes scope decisions.
 2. **`docs/engineering.md`** — the house style. Not optional context.
+3. **`docs/overview.md`** — what's built so far (stack, models, features, what's next).
 
 Short version of the rules (full detail in that doc):
 
