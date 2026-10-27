@@ -5,6 +5,7 @@ import { z } from "zod";
 import { ServiceType } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { clearNotificationsForServiceEvent } from "@/lib/reminder-notifications";
 import { ROUTES, SERVICE_TYPES } from "@/constants";
 import { FormField, inputClass } from "@/components/FormField";
 import { Button } from "@/components/Button";
@@ -63,6 +64,11 @@ export default async function RecordServicePage({
         performedAt: new Date(parsed.performedAt),
         note: parsed.note || null,
       },
+    });
+    await clearNotificationsForServiceEvent({
+      motorbikeId: id,
+      type: parsed.type as ServiceType,
+      label: parsed.label || null,
     });
 
     revalidatePath(ROUTES.motorbike(id));

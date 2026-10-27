@@ -5,6 +5,7 @@ import { z } from "zod";
 import { ServiceType } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { clearNotificationsForServiceEvent } from "@/lib/reminder-notifications";
 import { ROUTES, SERVICE_TYPES } from "@/constants";
 import { Card } from "@/components/Card";
 import { FormField, inputClass } from "@/components/FormField";
@@ -150,6 +151,11 @@ export default async function RemindersPage({
         atLifetimeKm: parsed.atLifetimeKm,
         performedAt: new Date(parsed.performedAt),
       },
+    });
+    await clearNotificationsForServiceEvent({
+      motorbikeId: id,
+      type: reminder.type,
+      label: reminder.label,
     });
     revalidatePath(ROUTES.reminders(id));
     revalidatePath(ROUTES.motorbike(id));

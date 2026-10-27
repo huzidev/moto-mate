@@ -90,6 +90,82 @@ export function passwordResetEmail({ name, code }: { name: string; code: string 
   };
 }
 
+export function reminderEmail(args: {
+  name: string;
+  bikeName: string;
+  reminderLabel: string;
+  status: "soon" | "due";
+  trigger: "km" | "time";
+  sinceKm: number;
+  intervalKm: number;
+  sinceDays: number | null;
+  maxDays: number | null;
+  bikeUrl: string;
+}) {
+  const dueText =
+    args.status === "due"
+      ? `is due for a <strong>${escapeHtml(args.reminderLabel)}</strong>`
+      : `is coming up on a <strong>${escapeHtml(args.reminderLabel)}</strong>`;
+
+  const chipColor =
+    args.status === "due"
+      ? { bg: "#fee2e2", border: "#fecaca", text: "#991b1b", word: "Due now" }
+      : { bg: "#fff7ed", border: "#fed7aa", text: "#9a3412", word: "Coming up" };
+
+  const stat = (label: string, value: string) => `
+    <td align="left" style="padding:8px 0;">
+      <div style="font-size:11px;color:#78716c;text-transform:uppercase;letter-spacing:1px;">${label}</div>
+      <div style="font-size:15px;color:#0c0a09;font-weight:600;margin-top:2px;">${value}</div>
+    </td>`;
+
+  const inner = `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+      <tr>
+        <td style="background:${chipColor.bg};border:1px solid ${chipColor.border};border-radius:999px;padding:4px 10px;color:${chipColor.text};font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">
+          ${chipColor.word}${args.trigger === "time" ? " · time-based" : ""}
+        </td>
+      </tr>
+    </table>
+
+    <h1 style="margin:14px 0 6px 0;font-size:22px;font-weight:600;line-height:1.3;">
+      ${escapeHtml(args.bikeName)} ${dueText}.
+    </h1>
+    <p style="margin:0 0 16px 0;font-size:14px;line-height:1.6;color:#44403c;">
+      Hi ${escapeHtml(args.name)} — a quick heads up so you can book it before it bites.
+    </p>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#fafaf9;border:1px solid #e7e5e4;border-radius:12px;padding:14px 18px;">
+      <tr>
+        ${stat("Since last", `${args.sinceKm.toLocaleString()} km`)}
+        ${stat("Interval", `${args.intervalKm.toLocaleString()} km`)}
+        ${
+          args.maxDays
+            ? stat("Days since", `${args.sinceDays ?? 0} / ${args.maxDays}d`)
+            : ""
+        }
+      </tr>
+    </table>
+
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:22px 0 4px 0;">
+      <tr>
+        <td style="background:#f97316;border-radius:10px;">
+          <a href="${args.bikeUrl}" style="display:inline-block;padding:12px 20px;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;">
+            Open ${escapeHtml(args.bikeName)} in ${APP.name} →
+          </a>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:12px 0 0 0;font-size:12px;color:#78716c;">
+      Record the service once it's done and we'll start a fresh countdown.
+    </p>
+  `;
+
+  return {
+    subject: `${args.bikeName} · ${args.status === "due" ? "service due" : "service coming up"} (${escapeHtml(args.reminderLabel)})`,
+    html: shell({ title: `Service reminder — ${APP.name}`, bodyInner: inner }),
+  };
+}
+
 function escapeHtml(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 }

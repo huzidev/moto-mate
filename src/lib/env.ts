@@ -13,6 +13,12 @@ const schema = z.object({
   // Accepts "name@domain" OR "Display Name <name@domain>" — Resend validates on send.
   RESEND_FROM: z.string().min(3),
 
+  // Public base URL used in outbound email links. Falls back to localhost in dev.
+  APP_URL: z.string().url().default("http://localhost:3000"),
+
+  // Shared secret for Vercel Cron auth. Optional in dev; required for the cron route.
+  CRON_SECRET: z.string().min(16).optional(),
+
   // Cloudinary (feature-gated — asserted in src/lib/cloudinary.ts when used)
   CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
   CLOUDINARY_API_KEY: z.string().min(1).optional(),

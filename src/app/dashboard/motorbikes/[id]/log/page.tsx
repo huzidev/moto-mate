@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkRemindersForBike } from "@/lib/reminder-notifications";
 import { ROUTES } from "@/constants";
 import { FormField, inputClass } from "@/components/FormField";
 import { Button } from "@/components/Button";
@@ -48,6 +49,13 @@ export default async function LogTripPage({
         note: parsed.note || null,
       },
     });
+
+    // Fire-and-ignore errors — log succeeded, user shouldn't see a 500 if email fails.
+    try {
+      await checkRemindersForBike(id);
+    } catch (e) {
+      console.error("[log] reminder check failed:", e);
+    }
 
     revalidatePath(ROUTES.motorbike(id));
     redirect(ROUTES.motorbike(id));
