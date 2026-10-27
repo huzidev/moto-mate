@@ -65,10 +65,28 @@ model Motorbike {
   odometerLogs  OdometerLog[]
   serviceEvents ServiceEvent[]
   reminders     ServiceReminder[]
+  fuelLogs      FuelLog[]
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
   @@index([userId])
+}
+
+/// One fillup. Tank-to-tank km/L is derived from consecutive logs.
+/// Assumes the user fills to full each time — add a note if you didn't.
+model FuelLog {
+  id           String    @id @default(cuid())
+  motorbikeId  String
+  motorbike    Motorbike @relation(fields: [motorbikeId], references: [id], onDelete: Cascade)
+  liters       Float
+  totalCost    Float?
+  atLifetimeKm Int
+  note         String?
+  receiptUrl   String?
+  filledAt     DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+
+  @@index([motorbikeId, filledAt])
 }
 
 model OdometerLog {

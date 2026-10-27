@@ -16,6 +16,7 @@ export const ROUTES = {
   logTrip: (id: string) => `/dashboard/motorbikes/${id}/log`,
   recordService: (id: string) => `/dashboard/motorbikes/${id}/service`,
   reminders: (id: string) => `/dashboard/motorbikes/${id}/reminders`,
+  logFuel: (id: string) => `/dashboard/motorbikes/${id}/fuel`,
 } as const;
 
 export const VEHICLE_TYPES = {

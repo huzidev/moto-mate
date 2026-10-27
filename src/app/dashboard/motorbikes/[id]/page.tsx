@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { getBikeWithStats } from "@/lib/motorbikes";
+import { computeFuelStats } from "@/lib/fuel";
 import { ROUTES } from "@/constants";
 import { Card } from "@/components/Card";
 import { LinkButton } from "@/components/Button";
@@ -23,6 +25,12 @@ export default async function MotorbikeDetailPage({
 
   const bike = await getBikeWithStats(id, session.user.id);
   if (!bike) notFound();
+
+  const fuelLogs = await prisma.fuelLog.findMany({
+    where: { motorbikeId: bike.id },
+    orderBy: { filledAt: "desc" },
+  });
+  const fuel = computeFuelStats(fuelLogs);
 
   const meta = [bike.make, bike.model, bike.year].filter(Boolean).join(" · ") || "No details yet";
 
@@ -114,6 +122,68 @@ export default async function MotorbikeDetailPage({
 
       <section>
         <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold tracking-tight">Fuel economy</h2>
+          <LinkButton href={ROUTES.logFuel(bike.id)} size="sm">
+            + Log fuel
+          </LinkButton>
+        </div>
+        {fuel.logs.length === 0 ? (
+          <Card padding="md" className="mt-4 text-sm text-muted">
+            No fuel logged yet. Log your first fillup to start tracking km/L.
+          </Card>
+        ) : fuel.logs.length === 1 ? (
+          <Card padding="md" className="mt-4 text-sm text-muted">
+            Baseline recorded ({fuel.logs[0].liters.toFixed(2)} L).
+            Log one more fillup to see km/L.
+          </Card>
+        ) : (
+          <>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <StatCard
+                label="Last tank"
+                value={formatKmPerL(fuel.lastTankKmPerLiter)}
+                sub="km / L"
+                accent
+              />
+              <StatCard
+                label="Rolling avg"
+                value={formatKmPerL(fuel.rollingKmPerLiter)}
+                sub="km / L"
+              />
+              <StatCard
+                label="Fuel used"
+                value={fuel.totalLiters.toFixed(1)}
+                sub="L across tracked tanks"
+              />
+              <StatCard
+                label="Spent"
+                value={fuel.totalCost != null ? fuel.totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 }) : "—"}
+                sub="total recorded"
+              />
+            </div>
+            <Card padding="none" className="mt-4 overflow-hidden">
+              <ul className="divide-y divide-[var(--border)]">
+                {fuel.logs.slice().reverse().slice(0, 10).map((l) => (
+                  <li key={l.id} className="flex items-center justify-between px-5 py-3 text-sm">
+                    <div>
+                      <span className="font-medium tabular-nums">{l.liters.toFixed(2)} L</span>
+                      <span className="ml-2 text-xs text-muted tabular-nums">@ {l.atLifetimeKm.toLocaleString()} km</span>
+                      {l.totalCost != null && (
+                        <span className="ml-2 text-xs text-muted tabular-nums">· {l.totalCost.toLocaleString()}</span>
+                      )}
+                      {l.note && <span className="ml-2 text-xs text-muted">· {l.note}</span>}
+                    </div>
+                    <span className="text-xs text-muted">{l.filledAt.toLocaleDateString()}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </>
+        )}
+      </section>
+
+      <section>
+        <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight">Recent trips</h2>
           <LinkButton href={ROUTES.logTrip(bike.id)} size="sm">
             + Log a trip
@@ -180,3 +250,35 @@ export default async function MotorbikeDetailPage({
     </div>
   );
 }
+
+function StatCard({
+  label,
+  value,
+  sub,
+  accent,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  accent?: boolean;
+}) {
+  return (
+    <Card padding="md">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+        {label}
+      </div>
+      <div
+        className={`mt-1 text-2xl font-semibold tabular-nums ${accent ? "text-brand-500" : ""}`}
+      >
+        {value}
+      </div>
+      {sub && <div className="mt-0.5 text-xs text-muted">{sub}</div>}
+    </Card>
+  );
+}
+
+function formatKmPerL(x: number | null) {
+  if (x == null || !isFinite(x)) return "—";
+  return x.toFixed(1);
+}
+
