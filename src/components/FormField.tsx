@@ -1,29 +1,37 @@
 import type { ReactNode } from "react";
 
 export const inputClass =
-  "h-10 w-full rounded-md border border-zinc-300 bg-transparent px-3 text-sm outline-none focus:border-zinc-900 dark:border-zinc-700 dark:focus:border-zinc-100";
+  "h-11 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] " +
+  "px-3.5 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] " +
+  "outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20";
 
 export function FormField({
   label,
   htmlFor,
   required,
   hint,
+  error,
   children,
 }: {
   label: string;
   htmlFor?: string;
   required?: boolean;
   hint?: string;
+  error?: string;
   children: ReactNode;
 }) {
   return (
-    <div className="space-y-1">
-      <label htmlFor={htmlFor} className="block text-xs font-medium text-zinc-500">
+    <div className="space-y-1.5">
+      <label htmlFor={htmlFor} className="block text-xs font-medium text-[var(--foreground)]">
         {label}
-        {required && <span className="text-red-500"> *</span>}
+        {required && <span className="ml-0.5 text-brand-500">*</span>}
       </label>
       {children}
-      {hint && <p className="text-xs text-zinc-400">{hint}</p>}
+      {error ? (
+        <p className="text-xs text-red-500">{error}</p>
+      ) : hint ? (
+        <p className="text-xs text-[var(--muted)]">{hint}</p>
+      ) : null}
     </div>
   );
 }

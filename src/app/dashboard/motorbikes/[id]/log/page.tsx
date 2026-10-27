@@ -6,6 +6,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ROUTES } from "@/constants";
 import { FormField, inputClass } from "@/components/FormField";
+import { Button } from "@/components/Button";
+import { Card } from "@/components/Card";
 
 const schema = z.object({
   km: z.coerce.number().int().min(1).max(100_000),
@@ -52,38 +54,54 @@ export default async function LogTripPage({
   }
 
   return (
-    <div className="mx-auto w-full max-w-md">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Log a trip · {bike.name}</h1>
-        <Link href={ROUTES.motorbike(id)} className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+    <div className="mx-auto w-full max-w-lg">
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Log a trip</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">{bike.name}</p>
+        </div>
+        <Link
+          href={ROUTES.motorbike(id)}
+          className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
+        >
           Cancel
         </Link>
       </div>
 
-      <form
-        action={logTrip}
-        className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
-      >
-        <FormField
-          label="Kilometers ridden"
-          htmlFor="km"
-          required
-          hint="How far you rode since your last log. The meter resetting doesn't matter — we only store deltas."
-        >
-          <input id="km" name="km" type="number" min={1} max={100000} required placeholder="120" className={inputClass} />
-        </FormField>
-
-        <FormField label="Note" htmlFor="note" hint="Optional — route, conditions, anything useful later.">
-          <input id="note" name="note" maxLength={200} placeholder="City ride, light rain" className={inputClass} />
-        </FormField>
-
-        <button
-          type="submit"
-          className="h-10 w-full rounded-md bg-zinc-900 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-        >
-          Save log
-        </button>
-      </form>
+      <Card padding="lg">
+        <form action={logTrip} className="space-y-5">
+          <FormField
+            label="Kilometers ridden"
+            htmlFor="km"
+            required
+            hint="How far you rode since your last log. Odometer resets don't matter — we only store deltas."
+          >
+            <input
+              id="km"
+              name="km"
+              type="number"
+              min={1}
+              max={100000}
+              required
+              autoFocus
+              placeholder="120"
+              className={inputClass}
+            />
+          </FormField>
+          <FormField label="Note" htmlFor="note" hint="Optional — route, conditions, anything useful later.">
+            <input
+              id="note"
+              name="note"
+              maxLength={200}
+              placeholder="City ride, light rain"
+              className={inputClass}
+            />
+          </FormField>
+          <Button type="submit" full size="lg">
+            Save log
+          </Button>
+        </form>
+      </Card>
     </div>
   );
 }

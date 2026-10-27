@@ -1,43 +1,92 @@
-import { signIn } from "@/lib/auth";
-import { APP, ROUTES } from "@/constants";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { signIn, auth } from "@/lib/auth";
+import { ROUTES } from "@/constants";
+import { AuthShell } from "@/components/AuthShell";
+import { FormField, inputClass } from "@/components/FormField";
+import { Button } from "@/components/Button";
 
-export default async function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; email?: string }>;
+}) {
   if (await auth()) redirect(ROUTES.dashboard);
+  const sp = await searchParams;
 
-  async function sendLink(formData: FormData) {
+  async function doSignIn(formData: FormData) {
     "use server";
-    await signIn("resend", {
-      email: String(formData.get("email")),
-      redirectTo: ROUTES.dashboard,
-    });
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+    try {
+      await signIn("credentials", {
+        email,
+        password,
+        redirectTo: ROUTES.dashboard,
+      });
+    } catch (err) {
+      if ((err as Error).message?.includes("NEXT_REDIRECT")) throw err;
+      redirect(`${ROUTES.signin}?error=1&email=${encodeURIComponent(email)}`);
+    }
   }
 
   return (
-    <main className="flex flex-1 items-center justify-center px-6 py-16">
-      <form
-        action={sendLink}
-        className="w-full max-w-sm space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
-      >
-        <div>
-          <h1 className="text-xl font-semibold">Sign in to {APP.name}</h1>
-          <p className="mt-1 text-sm text-zinc-500">We'll email you a magic link.</p>
+    <AuthShell
+      title="Welcome back"
+      subtitle="Sign in to keep tracking your ride."
+      footer={
+        <>
+          New here?{" "}
+          <Link href={ROUTES.signup} className="font-medium text-brand-500 hover:text-brand-600">
+            Create an account
+          </Link>
+        </>
+      }
+    >
+      <form action={doSignIn} className="space-y-4">
+        {sp.error && (
+          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
+            Invalid email or password.
+          </div>
+        )}
+        <FormField label="Email" htmlFor="email" required>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            defaultValue={sp.email ?? ""}
+            placeholder="you@example.com"
+            className={inputClass}
+          />
+        </FormField>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="block text-xs font-medium">
+              Password <span className="text-brand-500">*</span>
+            </label>
+            <Link
+              href={ROUTES.forgotPassword}
+              className="text-xs text-brand-500 hover:text-brand-600"
+            >
+              Forgot?
+            </Link>
+          </div>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            minLength={8}
+            className={inputClass}
+          />
         </div>
-        <input
-          name="email"
-          type="email"
-          required
-          placeholder="you@example.com"
-          className="h-10 w-full rounded-md border border-zinc-300 bg-transparent px-3 text-sm outline-none focus:border-zinc-900 dark:border-zinc-700 dark:focus:border-zinc-100"
-        />
-        <button
-          type="submit"
-          className="h-10 w-full rounded-md bg-zinc-900 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-        >
-          Send magic link
-        </button>
+        <Button type="submit" full size="lg">
+          Sign in
+        </Button>
       </form>
-    </main>
+    </AuthShell>
   );
 }
