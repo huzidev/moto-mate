@@ -23,4 +23,17 @@ const schema = z.object({
   OPENROUTER_MODEL: z.string().default("openai/gpt-4o-mini"),
 });
 
-export const env = schema.parse(process.env);
+const result = schema.safeParse(process.env);
+if (!result.success) {
+  const issues = result.error.issues
+    .map((i) => `  • ${i.path.join(".")} — ${i.message}`)
+    .join("\n");
+  throw new Error(
+    `\n\n🚫 Environment is not configured.\n\n` +
+      `${issues}\n\n` +
+      `Fix: open .env.local, fill the missing values, then restart the dev server.\n` +
+      `See .env.example for the full list and setup links.\n`,
+  );
+}
+
+export const env = result.data;
