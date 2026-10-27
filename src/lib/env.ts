@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 const schema = z.object({
-  // Database (Vercel Postgres exposes both; Prisma uses the pooled one)
-  POSTGRES_PRISMA_URL: z.string().url(),
+  // Database (Vercel Postgres / Neon expose both; Prisma uses the pooled one for queries)
+  DATABASE_URL: z.string().url(),
   POSTGRES_URL_NON_POOLING: z.string().url(),
 
   // Auth
