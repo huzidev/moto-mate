@@ -1,11 +1,9 @@
 import { redirect } from "next/navigation";
-import { connection } from "next/server";
 import Link from "next/link";
 import { auth, signOut } from "@/lib/auth";
 import { APP, ROUTES } from "@/constants";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  await connection(); // whole /dashboard subtree is per-user, never prerender
   const session = await auth();
   if (!session?.user) redirect(ROUTES.signin);
 
