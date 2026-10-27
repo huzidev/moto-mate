@@ -13,13 +13,13 @@ const schema = z.object({
   RESEND_API_KEY: z.string().startsWith("re_"),
   RESEND_FROM: z.string().email(),
 
-  // Cloudinary
-  CLOUDINARY_CLOUD_NAME: z.string().min(1),
-  CLOUDINARY_API_KEY: z.string().min(1),
-  CLOUDINARY_API_SECRET: z.string().min(1),
+  // Cloudinary (feature-gated — asserted in src/lib/cloudinary.ts when used)
+  CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
+  CLOUDINARY_API_KEY: z.string().min(1).optional(),
+  CLOUDINARY_API_SECRET: z.string().min(1).optional(),
 
-  // OpenRouter
-  OPENROUTER_API_KEY: z.string().startsWith("sk-or-"),
+  // OpenRouter (feature-gated — asserted in src/lib/openrouter.ts when used)
+  OPENROUTER_API_KEY: z.string().startsWith("sk-or-").optional(),
   OPENROUTER_MODEL: z.string().default("openai/gpt-4o-mini"),
 });
 

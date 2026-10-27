@@ -3,6 +3,10 @@ import { env } from "./env";
 type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
 export async function chat(messages: ChatMessage[], opts?: { model?: string; temperature?: number }) {
+  if (!env.OPENROUTER_API_KEY) {
+    throw new Error("OpenRouter not configured — set OPENROUTER_API_KEY in .env.local");
+  }
+
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
