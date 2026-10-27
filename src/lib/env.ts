@@ -22,7 +22,13 @@ const schema = z.object({
   OPENROUTER_MODEL: z.string().default("openai/gpt-4o-mini"),
 });
 
-const result = schema.safeParse(process.env);
+// Empty string from a .env file should count as "not set", so optional keys
+// don't trip their format rules just because the line exists.
+const cleaned = Object.fromEntries(
+  Object.entries(process.env).map(([k, v]) => [k, v === "" ? undefined : v]),
+);
+
+const result = schema.safeParse(cleaned);
 if (!result.success) {
   const issues = result.error.issues
     .map((i) => `  • ${i.path.join(".")} — ${i.message}`)
