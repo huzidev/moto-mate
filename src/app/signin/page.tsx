@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signIn, auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { issueCode } from "@/lib/auth-codes";
+import { issueCode, RateLimitedError } from "@/lib/auth-codes";
 import { ROUTES } from "@/constants";
 import { AuthShell } from "@/components/AuthShell";
 import { FormField, inputClass } from "@/components/FormField";
@@ -32,16 +32,21 @@ export default async function SignInPage({
       const msg = (err as Error).message ?? "";
       if (msg.includes("NEXT_REDIRECT")) throw err;
 
-      // Unverified → fire a fresh code and route to verify page.
+      // Unverified → fire a fresh code if the cooldown allows, then route to verify page.
       if (msg.includes("UNVERIFIED:")) {
         const user = await prisma.user.findUnique({ where: { email } });
         if (user) {
-          await issueCode({
-            userId: user.id,
-            purpose: "EMAIL_VERIFICATION",
-            email: user.email,
-            name: user.name,
-          });
+          try {
+            await issueCode({
+              userId: user.id,
+              purpose: "EMAIL_VERIFICATION",
+              email: user.email,
+              name: user.name,
+            });
+          } catch (e) {
+            if (!(e instanceof RateLimitedError)) throw e;
+            // Cooldown active — just route; they already have an active code.
+          }
         }
         redirect(`${ROUTES.verifyEmail}?email=${encodeURIComponent(email)}`);
       }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { consumeCode, issueCode } from "@/lib/auth-codes";
+import { consumeCode, issueCode, RateLimitedError } from "@/lib/auth-codes";
 import { hashPassword } from "@/lib/password";
 import { ROUTES } from "@/constants";
 import { AuthShell } from "@/components/AuthShell";
@@ -63,12 +63,21 @@ export default async function ResetPasswordPage({
     const emailParam = String(formData.get("email") ?? "").trim().toLowerCase();
     const user = await prisma.user.findUnique({ where: { email: emailParam } });
     if (user) {
-      await issueCode({
-        userId: user.id,
-        purpose: "PASSWORD_RESET",
-        email: user.email,
-        name: user.name,
-      });
+      try {
+        await issueCode({
+          userId: user.id,
+          purpose: "PASSWORD_RESET",
+          email: user.email,
+          name: user.name,
+        });
+      } catch (e) {
+        if (e instanceof RateLimitedError) {
+          return redirect(
+            `${ROUTES.resetPassword}?email=${encodeURIComponent(emailParam)}&error=${encodeURIComponent(e.message)}`,
+          );
+        }
+        throw e;
+      }
     }
     redirect(`${ROUTES.resetPassword}?email=${encodeURIComponent(emailParam)}&resent=1`);
   }

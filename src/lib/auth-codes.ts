@@ -7,6 +7,14 @@ import { verificationEmail, passwordResetEmail } from "./email-templates";
 
 const CODE_TTL_MINUTES = 10;
 const MAX_ATTEMPTS = 5;
+const RESEND_COOLDOWN_SECONDS = 60;
+
+export class RateLimitedError extends Error {
+  constructor(public retryInSeconds: number) {
+    super(`Please wait ${retryInSeconds}s before requesting another code.`);
+    this.name = "RateLimitedError";
+  }
+}
 
 function sixDigit() {
   // crypto.randomInt is uniform; 100000..999999 keeps the length fixed.
@@ -23,6 +31,19 @@ export async function issueCode(opts: {
   email: string;
   name: string;
 }) {
+  // Cooldown: don't let anyone spam resend. First-ever issue has no prior row, so no delay.
+  const latest = await prisma.authCode.findFirst({
+    where: { userId: opts.userId, purpose: opts.purpose },
+    orderBy: { createdAt: "desc" },
+    select: { createdAt: true },
+  });
+  if (latest) {
+    const elapsed = Math.floor((Date.now() - latest.createdAt.getTime()) / 1000);
+    if (elapsed < RESEND_COOLDOWN_SECONDS) {
+      throw new RateLimitedError(RESEND_COOLDOWN_SECONDS - elapsed);
+    }
+  }
+
   const code = sixDigit();
   const codeHash = await hashPassword(code);
 

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { issueCode, consumeCode } from "@/lib/auth-codes";
+import { issueCode, consumeCode, RateLimitedError } from "@/lib/auth-codes";
 import { ROUTES } from "@/constants";
 import { AuthShell } from "@/components/AuthShell";
 import { FormField, inputClass } from "@/components/FormField";
@@ -61,12 +61,21 @@ export default async function VerifyEmailPage({
     if (!user || user.emailVerifiedAt) {
       return redirect(`${ROUTES.verifyEmail}?email=${encodeURIComponent(parsed.data.email)}&resent=1`);
     }
-    await issueCode({
-      userId: user.id,
-      purpose: "EMAIL_VERIFICATION",
-      email: user.email,
-      name: user.name,
-    });
+    try {
+      await issueCode({
+        userId: user.id,
+        purpose: "EMAIL_VERIFICATION",
+        email: user.email,
+        name: user.name,
+      });
+    } catch (e) {
+      if (e instanceof RateLimitedError) {
+        return redirect(
+          `${ROUTES.verifyEmail}?email=${encodeURIComponent(user.email)}&error=${encodeURIComponent(e.message)}`,
+        );
+      }
+      throw e;
+    }
     redirect(`${ROUTES.verifyEmail}?email=${encodeURIComponent(user.email)}&resent=1`);
   }
 
