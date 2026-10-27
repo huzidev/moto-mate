@@ -3,6 +3,9 @@ import Link from "next/link";
 import { auth, signOut } from "@/lib/auth";
 import { APP, ROUTES } from "@/constants";
 
+// Every page under /dashboard is per-user and auth-gated — never prerender.
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect(ROUTES.signin);

@@ -3,6 +3,9 @@ import { APP, ROUTES } from "@/constants";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 
+// Auth reads cookies + uses crypto; can't be prerendered.
+export const dynamic = "force-dynamic";
+
 export default async function SignInPage() {
   if (await auth()) redirect(ROUTES.dashboard);
 
