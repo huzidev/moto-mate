@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { seedDefaultReminders } from "@/lib/motorbikes";
 import { ROUTES } from "@/constants";
+import { FormField, inputClass } from "@/components/FormField";
 
 const schema = z.object({
   name: z.string().trim().min(1).max(60),
@@ -11,11 +13,8 @@ const schema = z.object({
   model: z.string().trim().max(40).optional().or(z.literal("")),
   year: z.coerce.number().int().min(1900).max(2100).optional().or(z.literal("")),
   plate: z.string().trim().max(20).optional().or(z.literal("")),
+  city: z.string().trim().max(60).optional().or(z.literal("")),
 });
-
-const input =
-  "h-10 w-full rounded-md border border-zinc-300 bg-transparent px-3 text-sm outline-none focus:border-zinc-900 dark:border-zinc-700 dark:focus:border-zinc-100";
-const label = "block text-xs font-medium text-zinc-500";
 
 export default async function NewMotorbikePage() {
   const session = await auth();
@@ -27,7 +26,7 @@ export default async function NewMotorbikePage() {
     if (!s?.user?.id) redirect(ROUTES.signin);
 
     const parsed = schema.parse(Object.fromEntries(formData));
-    await prisma.motorbike.create({
+    const bike = await prisma.motorbike.create({
       data: {
         userId: s.user.id,
         name: parsed.name,
@@ -35,9 +34,11 @@ export default async function NewMotorbikePage() {
         model: parsed.model || null,
         year: typeof parsed.year === "number" ? parsed.year : null,
         plate: parsed.plate || null,
+        city: parsed.city || null,
       },
     });
-    redirect(ROUTES.dashboard);
+    await seedDefaultReminders(bike.id);
+    redirect(ROUTES.motorbike(bike.id));
   }
 
   return (
@@ -53,32 +54,31 @@ export default async function NewMotorbikePage() {
         action={addBike}
         className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
       >
-        <div className="space-y-1">
-          <label htmlFor="name" className={label}>Name <span className="text-red-500">*</span></label>
-          <input id="name" name="name" required maxLength={60} placeholder="My Ride" className={input} />
+        <FormField label="Name" htmlFor="name" required>
+          <input id="name" name="name" required maxLength={60} placeholder="My Ride" className={inputClass} />
+        </FormField>
+
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="Make" htmlFor="make">
+            <input id="make" name="make" maxLength={40} placeholder="Honda" className={inputClass} />
+          </FormField>
+          <FormField label="Model" htmlFor="model">
+            <input id="model" name="model" maxLength={40} placeholder="CB150F" className={inputClass} />
+          </FormField>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label htmlFor="make" className={label}>Make</label>
-            <input id="make" name="make" maxLength={40} placeholder="Honda" className={input} />
-          </div>
-          <div className="space-y-1">
-            <label htmlFor="model" className={label}>Model</label>
-            <input id="model" name="model" maxLength={40} placeholder="CB150F" className={input} />
-          </div>
+          <FormField label="Year" htmlFor="year">
+            <input id="year" name="year" type="number" min={1900} max={2100} placeholder="2022" className={inputClass} />
+          </FormField>
+          <FormField label="Plate" htmlFor="plate">
+            <input id="plate" name="plate" maxLength={20} placeholder="ABC-123" className={inputClass} />
+          </FormField>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label htmlFor="year" className={label}>Year</label>
-            <input id="year" name="year" type="number" min={1900} max={2100} placeholder="2022" className={input} />
-          </div>
-          <div className="space-y-1">
-            <label htmlFor="plate" className={label}>Plate</label>
-            <input id="plate" name="plate" maxLength={20} placeholder="ABC-123" className={input} />
-          </div>
-        </div>
+        <FormField label="City" htmlFor="city" hint="Used later for weather-aware AI service tips.">
+          <input id="city" name="city" maxLength={60} placeholder="Karachi" className={inputClass} />
+        </FormField>
 
         <button
           type="submit"

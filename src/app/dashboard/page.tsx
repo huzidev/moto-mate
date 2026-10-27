@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ROUTES, VEHICLE_TYPES } from "@/constants";
@@ -19,14 +20,16 @@ export default async function DashboardPage() {
         ) : (
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {bikes.map((b) => (
-              <li
-                key={b.id}
-                className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
-              >
-                <div className="font-medium">{b.name}</div>
-                <div className="text-xs text-zinc-500">
-                  {[b.make, b.model, b.year].filter(Boolean).join(" · ")}
-                </div>
+              <li key={b.id}>
+                <Link
+                  href={ROUTES.motorbike(b.id)}
+                  className="block rounded-xl border border-zinc-200 bg-white p-4 transition hover:border-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-100"
+                >
+                  <div className="font-medium">{b.name}</div>
+                  <div className="text-xs text-zinc-500">
+                    {[b.make, b.model, b.year].filter(Boolean).join(" · ") || "—"}
+                  </div>
+                </Link>
               </li>
             ))}
           </ul>

@@ -56,18 +56,76 @@ model VerificationToken {
 }
 
 // ---------- Domain ----------
+enum ServiceType {
+  OIL_CHANGE
+  TUNE
+  CUSTOM
+}
+
 model Motorbike {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String
-  make      String?
-  model     String?
-  year      Int?
-  plate     String?
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String             @id @default(cuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  make          String?
+  model         String?
+  year          Int?
+  plate         String?
+  city          String?            // for weather-aware AI recs later
+  imageUrl      String?
+  odometerLogs  OdometerLog[]
+  serviceEvents ServiceEvent[]
+  reminders     ServiceReminder[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 
   @@index([userId])
+}
+
+/// Each entry is a trip delta: "I rode X km since my last log."
+/// Lifetime km = sum of all logs for the bike. Meter resets are irrelevant.
+model OdometerLog {
+  id          String    @id @default(cuid())
+  motorbikeId String
+  motorbike   Motorbike @relation(fields: [motorbikeId], references: [id], onDelete: Cascade)
+  km          Int       // delta since previous log; must be >= 0
+  note        String?
+  loggedAt    DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+
+  @@index([motorbikeId, loggedAt])
+}
+
+/// A service was performed at this lifetime km. Resets the counter for its type.
+model ServiceEvent {
+  id             String      @id @default(cuid())
+  motorbikeId    String
+  motorbike      Motorbike   @relation(fields: [motorbikeId], references: [id], onDelete: Cascade)
+  type           ServiceType
+  label          String?     // free text when type = CUSTOM
+  atLifetimeKm   Int         // lifetime km at the moment of service
+  note           String?
+  performedAt    DateTime    @default(now())
+  createdAt      DateTime    @default(now())
+
+  @@index([motorbikeId, type, performedAt])
+}
+
+/// Config per bike per service type: notify every intervalKm, or after maxDays, whichever first.
+model ServiceReminder {
+  id              String      @id @default(cuid())
+  motorbikeId     String
+  motorbike       Motorbike   @relation(fields: [motorbikeId], references: [id], onDelete: Cascade)
+  type            ServiceType
+  label           String?     // for CUSTOM
+  intervalKm      Int
+  maxDays         Int?        // ponytail: time-based safety net (oil oxidation); null = km-only
+  active          Boolean     @default(true)
+  lastNotifiedKm  Int?
+  lastNotifiedAt  DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@unique([motorbikeId, type, label])
+  @@index([motorbikeId])
 }
