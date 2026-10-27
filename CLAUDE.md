@@ -1,8 +1,9 @@
 # MotoMate — agent brief
 
-Before writing or changing code in this repo, **read `docs/engineering.md`**.
-It defines the conventions this project is built on and is not optional
-context — it's the house style.
+Before writing or changing code in this repo, read:
+
+1. **`docs/vision.md`** — what this product is and why. Shapes scope decisions.
+2. **`docs/engineering.md`** — the house style. Not optional context.
 
 Short version of the rules (full detail in that doc):
 
