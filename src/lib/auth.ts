@@ -7,7 +7,7 @@ import { env } from "./env";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "database" },
-  pages: { signIn: "/signin" },
+  pages: { signIn: "/signin", verifyRequest: "/signin/check-email" },
   providers: [
     Resend({
       apiKey: env.RESEND_API_KEY,

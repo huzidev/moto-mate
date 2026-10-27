@@ -6,6 +6,7 @@ export const APP = {
 export const ROUTES = {
   home: "/",
   signin: "/signin",
+  checkEmail: "/signin/check-email",
   dashboard: "/dashboard",
   addMotorbike: "/dashboard/motorbikes/new",
   motorbike: (id: string) => `/dashboard/motorbikes/${id}`,
