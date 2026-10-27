@@ -21,12 +21,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const user = await prisma.user.findUnique({
           where: { email: parsed.data.email.toLowerCase() },
-          select: { id: true, email: true, name: true, passwordHash: true },
+          select: { id: true, email: true, name: true, passwordHash: true, emailVerifiedAt: true },
         });
         if (!user) return null;
 
         const ok = await verifyPassword(parsed.data.password, user.passwordHash);
         if (!ok) return null;
+
+        // Surface "not verified" distinctly so the signin page can route to /verify-email.
+        if (!user.emailVerifiedAt) throw new Error(`UNVERIFIED:${user.id}`);
 
         return { id: user.id, email: user.email, name: user.name };
       },

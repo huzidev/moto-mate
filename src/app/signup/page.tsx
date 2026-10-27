@@ -1,20 +1,28 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { auth, signIn } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
+import { issueCode } from "@/lib/auth-codes";
 import { ROUTES } from "@/constants";
 import { AuthShell } from "@/components/AuthShell";
 import { FormField, inputClass } from "@/components/FormField";
+import { PasswordInput } from "@/components/PasswordInput";
 import { Button } from "@/components/Button";
 
-const schema = z.object({
-  name: z.string().trim().min(1, "Enter your name").max(60),
-  email: z.string().trim().email().toLowerCase(),
-  phone: z.string().trim().max(30).optional().or(z.literal("")),
-  password: z.string().min(8, "At least 8 characters"),
-});
+const schema = z
+  .object({
+    name: z.string().trim().min(1, "Enter your name").max(60),
+    email: z.string().trim().email().toLowerCase(),
+    phone: z.string().trim().max(30).optional().or(z.literal("")),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirm: z.string(),
+  })
+  .refine((v) => v.password === v.confirm, {
+    message: "Passwords don't match",
+    path: ["confirm"],
+  });
 
 export default async function SignUpPage({
   searchParams,
@@ -28,21 +36,30 @@ export default async function SignUpPage({
     "use server";
     const raw = Object.fromEntries(formData);
     const parsed = schema.safeParse(raw);
-    if (!parsed.success) {
-      const msg = parsed.error.issues[0]?.message ?? "Invalid input";
-      return redirect(
+
+    const back = (msg: string) =>
+      redirect(
         `${ROUTES.signup}?error=${encodeURIComponent(msg)}&name=${encodeURIComponent(String(raw.name ?? ""))}&email=${encodeURIComponent(String(raw.email ?? ""))}&phone=${encodeURIComponent(String(raw.phone ?? ""))}`,
       );
-    }
+
+    if (!parsed.success) return back(parsed.error.issues[0]?.message ?? "Invalid input");
 
     const existing = await prisma.user.findUnique({ where: { email: parsed.data.email } });
     if (existing) {
-      return redirect(
-        `${ROUTES.signup}?error=${encodeURIComponent("An account with that email already exists.")}&email=${encodeURIComponent(parsed.data.email)}`,
-      );
+      // Unverified → let them re-verify. Verified → tell them to sign in.
+      if (!existing.emailVerifiedAt) {
+        await issueCode({
+          userId: existing.id,
+          purpose: "EMAIL_VERIFICATION",
+          email: existing.email,
+          name: existing.name,
+        });
+        return redirect(`${ROUTES.verifyEmail}?email=${encodeURIComponent(existing.email)}`);
+      }
+      return back("An account with that email already exists.");
     }
 
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         name: parsed.data.name,
         email: parsed.data.email,
@@ -51,11 +68,14 @@ export default async function SignUpPage({
       },
     });
 
-    await signIn("credentials", {
-      email: parsed.data.email,
-      password: parsed.data.password,
-      redirectTo: ROUTES.dashboard,
+    await issueCode({
+      userId: user.id,
+      purpose: "EMAIL_VERIFICATION",
+      email: user.email,
+      name: user.name,
     });
+
+    redirect(`${ROUTES.verifyEmail}?email=${encodeURIComponent(user.email)}`);
   }
 
   return (
@@ -113,15 +133,22 @@ export default async function SignUpPage({
             className={inputClass}
           />
         </FormField>
-        <FormField label="Password" htmlFor="password" required hint="Minimum 8 characters.">
-          <input
+        <FormField label="Password" htmlFor="password" required hint="At least 8 characters.">
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             required
             minLength={8}
             autoComplete="new-password"
-            className={inputClass}
+          />
+        </FormField>
+        <FormField label="Confirm password" htmlFor="confirm" required>
+          <PasswordInput
+            id="confirm"
+            name="confirm"
+            required
+            minLength={8}
+            autoComplete="new-password"
           />
         </FormField>
         <Button type="submit" full size="lg">

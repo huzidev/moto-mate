@@ -9,29 +9,39 @@ datasource db {
   // connection pooler (Neon/Vercel/Supabase) that breaks schema ops.
 }
 
-// ---------- Auth (we own this; no Auth.js adapter — Credentials + JWT) ----------
+// ---------- Auth (Credentials + JWT; no adapter) ----------
 model User {
-  id              String               @id @default(cuid())
+  id              String      @id @default(cuid())
   name            String
-  email           String               @unique
+  email           String      @unique
   phone           String?
   passwordHash    String
+  emailVerifiedAt DateTime?
   motorbikes      Motorbike[]
-  resetTokens     PasswordResetToken[]
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  authCodes       AuthCode[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 }
 
-model PasswordResetToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
+enum AuthCodePurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+/// One row per issued 6-digit code. Code itself is bcrypt-hashed.
+/// Rate-limited at the verify site: max 5 wrong attempts.
+model AuthCode {
+  id        String          @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose   AuthCodePurpose
+  codeHash  String
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  attempts  Int             @default(0)
+  createdAt DateTime        @default(now())
 
-  @@index([userId])
+  @@index([userId, purpose])
 }
 
 // ---------- Domain ----------
@@ -61,10 +71,6 @@ model Motorbike {
   @@index([userId])
 }
 
-/// Each entry is a delta: "I rode X km since my last log."
-/// Lifetime km = sum of all logs. Meter resets are irrelevant.
-/// The "starting lifetime km" captured on bike creation is also stored here as
-/// a single OdometerLog with note="starting km".
 model OdometerLog {
   id          String    @id @default(cuid())
   motorbikeId String
@@ -77,7 +83,6 @@ model OdometerLog {
   @@index([motorbikeId, loggedAt])
 }
 
-/// A service was performed at this lifetime km. Resets the counter for its type.
 model ServiceEvent {
   id           String      @id @default(cuid())
   motorbikeId  String
@@ -87,12 +92,11 @@ model ServiceEvent {
   atLifetimeKm Int
   note         String?
   performedAt  DateTime    @default(now())
-  createdAt    DateTime    @default(now())
+  createdAt   DateTime    @default(now())
 
   @@index([motorbikeId, type, performedAt])
 }
 
-/// Config per bike per service type: notify every intervalKm, or after maxDays, whichever first.
 model ServiceReminder {
   id             String      @id @default(cuid())
   motorbikeId    String
