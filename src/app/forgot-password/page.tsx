@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { issueCode } from "@/lib/auth-codes";
+import { issueCode, RateLimitedError } from "@/lib/auth-codes";
 import { ROUTES } from "@/constants";
 import { AuthShell } from "@/components/AuthShell";
 import { FormField, inputClass } from "@/components/FormField";
@@ -28,12 +28,24 @@ export default async function ForgotPasswordPage({
     const user = await prisma.user.findUnique({ where: { email } });
     // ponytail: don't leak which emails exist — always redirect to the reset page.
     if (user) {
-      await issueCode({
-        userId: user.id,
-        purpose: "PASSWORD_RESET",
-        email: user.email,
-        name: user.name,
-      });
+      try {
+        await issueCode({
+          userId: user.id,
+          purpose: "PASSWORD_RESET",
+          email: user.email,
+          name: user.name,
+        });
+      } catch (e) {
+        if (e instanceof RateLimitedError) {
+          return redirect(
+            `${ROUTES.resetPassword}?email=${encodeURIComponent(email)}&error=${encodeURIComponent(e.message)}`,
+          );
+        }
+        // Email send failure or anything else — surface so the user doesn't sit in silence.
+        return redirect(
+          `${ROUTES.forgotPassword}?error=${encodeURIComponent((e as Error).message)}`,
+        );
+      }
     }
 
     redirect(`${ROUTES.resetPassword}?email=${encodeURIComponent(email)}`);

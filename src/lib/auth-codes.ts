@@ -67,6 +67,12 @@ export async function issueCode(opts: {
       ? verificationEmail({ name: opts.name, code })
       : passwordResetEmail({ name: opts.name, code });
 
+  // Dev convenience: surface the code in the server log so you can test without inbox.
+  // ponytail: remove / env-gate when the project goes beyond solo dev use.
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[auth-codes] ${opts.purpose} code for ${opts.email}: ${code}`);
+  }
+
   await sendEmail({ to: opts.email, ...tpl });
 }
 
