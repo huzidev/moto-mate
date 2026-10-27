@@ -26,30 +26,37 @@ export default async function MotorbikeDetailPage({
 
   const meta = [bike.make, bike.model, bike.year].filter(Boolean).join(" · ") || "No details yet";
 
+  const tripCount = bike.odometerLogs.length;
+
   return (
     <div className="space-y-10">
-      <header className="flex flex-wrap items-start justify-between gap-6">
-        <div>
-          <Link
-            href={ROUTES.dashboard}
-            className="text-xs text-[var(--muted)] hover:text-[var(--foreground)]"
-          >
-            ← Garage
-          </Link>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">{bike.name}</h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">{meta}</p>
+      <header>
+        <Link
+          href={ROUTES.dashboard}
+          className="text-xs text-muted hover:text-foreground"
+        >
+          ← Garage
+        </Link>
+        <div className="mt-3 flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight">{bike.name}</h1>
+            <p className="mt-1 text-sm text-muted">{meta}</p>
+          </div>
+          <div className="text-right">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+              Lifetime mileage
+            </div>
+            <div className="mt-1 flex items-baseline justify-end gap-1.5">
+              <span className="text-5xl font-semibold tabular-nums text-brand-500">
+                {bike.lifetimeKm.toLocaleString()}
+              </span>
+              <span className="text-sm text-muted">km</span>
+            </div>
+            <div className="mt-0.5 text-xs text-muted">
+              across {tripCount} {tripCount === 1 ? "log" : "logs"}
+            </div>
+          </div>
         </div>
-        <Card padding="md" className="min-w-[200px]">
-          <div className="text-[10px] uppercase tracking-wider text-[var(--muted)]">
-            Lifetime
-          </div>
-          <div className="mt-1 flex items-baseline gap-1">
-            <span className="text-3xl font-semibold tabular-nums">
-              {bike.lifetimeKm.toLocaleString()}
-            </span>
-            <span className="text-sm text-[var(--muted)]">km</span>
-          </div>
-        </Card>
       </header>
 
       <section>
