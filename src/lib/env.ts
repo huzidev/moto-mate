@@ -10,7 +10,8 @@ const schema = z.object({
 
   // Resend
   RESEND_API_KEY: z.string().startsWith("re_"),
-  RESEND_FROM: z.string().email(),
+  // Accepts "name@domain" OR "Display Name <name@domain>" — Resend validates on send.
+  RESEND_FROM: z.string().min(3),
 
   // Cloudinary (feature-gated — asserted in src/lib/cloudinary.ts when used)
   CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
@@ -36,7 +37,7 @@ if (!result.success) {
   throw new Error(
     `\n\n🚫 Environment is not configured.\n\n` +
       `${issues}\n\n` +
-      `Fix: open .env.local, fill the missing values, then restart the dev server.\n` +
+      `Fix: open .env, fill the missing values, then restart the dev server.\n` +
       `See .env.example for the full list and setup links.\n`,
   );
 }
