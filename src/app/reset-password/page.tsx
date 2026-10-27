@@ -6,9 +6,7 @@ import { consumeCode, issueCode, RateLimitedError } from "@/lib/auth-codes";
 import { hashPassword } from "@/lib/password";
 import { ROUTES } from "@/constants";
 import { AuthShell } from "@/components/AuthShell";
-import { FormField, inputClass } from "@/components/FormField";
-import { PasswordInput } from "@/components/PasswordInput";
-import { Button } from "@/components/Button";
+import { ResetForm } from "./ResetForm";
 
 const schema = z
   .object({
@@ -95,59 +93,7 @@ export default async function ResetPasswordPage({
         </>
       }
     >
-      <form action={doReset} className="space-y-4">
-        <input type="hidden" name="email" value={email} />
-
-        {sp.error && (
-          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
-            {sp.error}
-          </div>
-        )}
-        {sp.resent && !sp.error && (
-          <div className="rounded-md border border-brand-200 bg-brand-50 px-3 py-2 text-xs text-brand-700 dark:border-brand-900/40 dark:bg-brand-900/20 dark:text-brand-300">
-            A new code has been sent.
-          </div>
-        )}
-
-        <FormField label="Verification code" htmlFor="code" required>
-          <input
-            id="code"
-            name="code"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            required
-            autoFocus
-            placeholder="123456"
-            className={`${inputClass} tracking-[0.4em] text-center font-mono text-lg`}
-          />
-        </FormField>
-
-        <FormField label="New password" htmlFor="password" required hint="At least 8 characters.">
-          <PasswordInput
-            id="password"
-            name="password"
-            required
-            minLength={8}
-            autoComplete="new-password"
-          />
-        </FormField>
-
-        <FormField label="Confirm new password" htmlFor="confirm" required>
-          <PasswordInput
-            id="confirm"
-            name="confirm"
-            required
-            minLength={8}
-            autoComplete="new-password"
-          />
-        </FormField>
-
-        <Button type="submit" full size="lg">
-          Update password
-        </Button>
-      </form>
+      <ResetForm action={doReset} email={email} error={sp.error} resent={!!sp.resent} />
 
       <form action={resend} className="mt-4 text-center text-xs text-muted">
         <input type="hidden" name="email" value={email} />
