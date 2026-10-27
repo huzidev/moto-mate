@@ -1,12 +1,11 @@
 import { signIn } from "@/lib/auth";
 import { APP, ROUTES } from "@/constants";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { auth } from "@/lib/auth";
 
-// Auth reads cookies + uses crypto; can't be prerendered.
-export const dynamic = "force-dynamic";
-
 export default async function SignInPage() {
+  await connection(); // auth uses crypto + cookies; must run per-request
   if (await auth()) redirect(ROUTES.dashboard);
 
   async function sendLink(formData: FormData) {
