@@ -8,7 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { clearNotificationsForServiceEvent } from "@/lib/reminder-notifications";
 import { ROUTES, SERVICE_TYPES } from "@/constants";
 import { Card } from "@/components/Card";
-import { FormField, inputClass, selectClass } from "@/components/FormField";
+import { FormField, inputClass } from "@/components/FormField";
+import { Select } from "@/components/Select";
 import { SubmitButton } from "@/components/SubmitButton";
 
 const updateSchema = z.object({
@@ -318,16 +319,11 @@ export default async function RemindersPage({
           <form action={addReminder} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <FormField label="Type" htmlFor="type" required>
-                <select
-                  id="type"
-                  name="type"
-                  defaultValue="CUSTOM"
-                  className={selectClass}
-                >
+                <Select id="type" name="type" defaultValue="CUSTOM">
                   <option value="OIL_CHANGE">Oil change</option>
                   <option value="TUNE">Tune / major service</option>
                   <option value="CUSTOM">Custom</option>
-                </select>
+                </Select>
               </FormField>
               <FormField label="Label" htmlFor="label" hint="Only used for Custom type.">
                 <input

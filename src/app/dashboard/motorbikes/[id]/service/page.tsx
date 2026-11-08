@@ -7,7 +7,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { clearNotificationsForServiceEvent } from "@/lib/reminder-notifications";
 import { ROUTES, SERVICE_TYPES } from "@/constants";
-import { FormField, inputClass, selectClass } from "@/components/FormField";
+import { FormField, inputClass } from "@/components/FormField";
+import { Select } from "@/components/Select";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Card } from "@/components/Card";
 
@@ -97,16 +98,11 @@ export default async function RecordServicePage({
         <form action={recordService} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Service type" htmlFor="type" required>
-              <select
-                id="type"
-                name="type"
-                defaultValue="OIL_CHANGE"
-                className={selectClass}
-              >
+              <Select id="type" name="type" defaultValue="OIL_CHANGE">
                 <option value="OIL_CHANGE">{SERVICE_TYPES.OIL_CHANGE.label}</option>
                 <option value="TUNE">{SERVICE_TYPES.TUNE.label}</option>
                 <option value="CUSTOM">{SERVICE_TYPES.CUSTOM.label}</option>
-              </select>
+              </Select>
             </FormField>
             <FormField label="Label" htmlFor="label" hint="Required for Custom; optional for other types.">
               <input
