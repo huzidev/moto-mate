@@ -15,9 +15,12 @@ export const ROUTES = {
   addMotorbike: "/dashboard/motorbikes/new",
   motorbike: (id: string) => `/dashboard/motorbikes/${id}`,
   logTrip: (id: string) => `/dashboard/motorbikes/${id}/log`,
+  editTrip: (id: string, logId: string) => `/dashboard/motorbikes/${id}/log/${logId}`,
   recordService: (id: string) => `/dashboard/motorbikes/${id}/service`,
+  editService: (id: string, eventId: string) => `/dashboard/motorbikes/${id}/service/${eventId}`,
   reminders: (id: string) => `/dashboard/motorbikes/${id}/reminders`,
   logFuel: (id: string) => `/dashboard/motorbikes/${id}/fuel`,
+  editFuel: (id: string, fuelId: string) => `/dashboard/motorbikes/${id}/fuel/${fuelId}`,
 } as const;
 
 export const VEHICLE_TYPES = {

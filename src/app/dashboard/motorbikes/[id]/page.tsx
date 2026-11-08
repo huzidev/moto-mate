@@ -7,6 +7,7 @@ import { computeFuelStats } from "@/lib/fuel";
 import { ROUTES } from "@/constants";
 import { Card } from "@/components/Card";
 import { LinkButton } from "@/components/Button";
+import { EditLink } from "@/components/EditLink";
 
 const statusStyle = {
   due: "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300",
@@ -173,7 +174,10 @@ export default async function MotorbikeDetailPage({
                       )}
                       {l.note && <span className="ml-2 text-xs text-muted">· {l.note}</span>}
                     </div>
-                    <span className="text-xs text-muted">{l.filledAt.toLocaleDateString()}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-muted">{l.filledAt.toLocaleDateString()}</span>
+                      <EditLink href={ROUTES.editFuel(bike.id, l.id)} label="Edit fillup" />
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -204,9 +208,12 @@ export default async function MotorbikeDetailPage({
                       <span className="ml-2 text-[var(--muted)]">· {l.note}</span>
                     )}
                   </div>
-                  <span className="text-xs text-[var(--muted)]">
-                    {l.loggedAt.toLocaleDateString()}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-[var(--muted)]">
+                      {l.loggedAt.toLocaleDateString()}
+                    </span>
+                    <EditLink href={ROUTES.editTrip(bike.id, l.id)} label="Edit trip" />
+                  </div>
                 </li>
               ))}
             </ul>
@@ -238,9 +245,12 @@ export default async function MotorbikeDetailPage({
                       @ {e.atLifetimeKm.toLocaleString()} km
                     </span>
                   </div>
-                  <span className="text-xs text-[var(--muted)]">
-                    {e.performedAt.toLocaleDateString()}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-[var(--muted)]">
+                      {e.performedAt.toLocaleDateString()}
+                    </span>
+                    <EditLink href={ROUTES.editService(bike.id, e.id)} label="Edit service" />
+                  </div>
                 </li>
               ))}
             </ul>
