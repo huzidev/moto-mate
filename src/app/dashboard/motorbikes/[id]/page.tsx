@@ -9,8 +9,7 @@ import { Card } from "@/components/Card";
 import { LinkButton } from "@/components/Button";
 import { EditLink } from "@/components/EditLink";
 import { ServiceCounterList } from "@/components/ServiceCounterList";
-import { FuelChart } from "@/components/FuelChart";
-import { ExpenseChart } from "@/components/ExpenseChart";
+import { LineChart } from "@/components/LineChart";
 import { InfoTip } from "@/components/InfoTip";
 import { BackLink } from "@/components/BackLink";
 
@@ -32,7 +31,6 @@ export default async function MotorbikeDetailPage({
   });
   const fuel = computeFuelStats(fuelLogs);
   const fuelMonthData = bucketFuelForChart(fuelLogs, "month");
-  const fuelYearData = bucketFuelForChart(fuelLogs, "year");
 
   const expenses = await prisma.expense.findMany({
     where: { motorbikeId: bike.id },
@@ -40,7 +38,6 @@ export default async function MotorbikeDetailPage({
   });
   const expenseStats = computeExpenseStats(expenses);
   const expenseMonthData = bucketExpensesForChart(expenses, "month");
-  const expenseYearData = bucketExpensesForChart(expenses, "year");
 
   const meta = [bike.make, bike.model, bike.year].filter(Boolean).join(" · ") || "No details yet";
 
@@ -98,9 +95,18 @@ export default async function MotorbikeDetailPage({
       <section>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight">Fuel economy</h2>
-          <LinkButton href={ROUTES.logFuel(bike.id)} size="sm">
-            + Log fuel
-          </LinkButton>
+          <div className="flex items-center gap-2">
+            <LinkButton
+              href={`${ROUTES.analytics(bike.id)}`}
+              variant="ghost"
+              size="sm"
+            >
+              View analytics →
+            </LinkButton>
+            <LinkButton href={ROUTES.logFuel(bike.id)} size="sm">
+              + Log fuel
+            </LinkButton>
+          </div>
         </div>
         {fuel.logs.length === 0 ? (
           <Card padding="md" className="mt-4 text-sm text-muted">
@@ -137,7 +143,12 @@ export default async function MotorbikeDetailPage({
               />
             </div>
             <Card padding="md" className="mt-4">
-              <FuelChart monthData={fuelMonthData} yearData={fuelYearData} />
+              <LineChart
+                data={fuelMonthData}
+                seriesLabel="km / L"
+                mini
+                emptyLabel="Not enough data yet."
+              />
             </Card>
             <Card padding="none" className="mt-4 overflow-hidden">
               <ul className="divide-y divide-[var(--border)]">
@@ -166,9 +177,18 @@ export default async function MotorbikeDetailPage({
       <section>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight">Expenses</h2>
-          <LinkButton href={ROUTES.logExpense(bike.id)} size="sm">
-            + Log expense
-          </LinkButton>
+          <div className="flex items-center gap-2">
+            <LinkButton
+              href={`${ROUTES.analytics(bike.id)}?tab=expenses`}
+              variant="ghost"
+              size="sm"
+            >
+              View analytics →
+            </LinkButton>
+            <LinkButton href={ROUTES.logExpense(bike.id)} size="sm">
+              + Log expense
+            </LinkButton>
+          </div>
         </div>
         {expenses.length === 0 ? (
           <Card padding="md" className="mt-4 text-sm text-muted">
@@ -200,7 +220,13 @@ export default async function MotorbikeDetailPage({
               />
             </div>
             <Card padding="md" className="mt-4">
-              <ExpenseChart monthData={expenseMonthData} yearData={expenseYearData} />
+              <LineChart
+                data={expenseMonthData}
+                seriesLabel="Spent"
+                format={(y) => y.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                mini
+                emptyLabel="No spend yet."
+              />
             </Card>
             <Card padding="none" className="mt-4 overflow-hidden">
               <ul className="divide-y divide-[var(--border)]">
