@@ -2,14 +2,13 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getBikeWithStats } from "@/lib/motorbikes";
-import { bucketFuelForChart, computeFuelStats } from "@/lib/fuel";
-import { bucketExpensesForChart, computeExpenseStats } from "@/lib/expenses";
+import { computeFuelStats } from "@/lib/fuel";
+import { computeExpenseStats } from "@/lib/expenses";
 import { ROUTES } from "@/constants";
 import { Card } from "@/components/Card";
 import { LinkButton } from "@/components/Button";
 import { EditLink } from "@/components/EditLink";
 import { ServiceCounterList } from "@/components/ServiceCounterList";
-import { LineChart } from "@/components/LineChart";
 import { InfoTip } from "@/components/InfoTip";
 import { BackLink } from "@/components/BackLink";
 import { DeleteRowButton } from "@/components/DeleteRowButton";
@@ -37,14 +36,12 @@ export default async function MotorbikeDetailPage({
     orderBy: { filledAt: "desc" },
   });
   const fuel = computeFuelStats(fuelLogs);
-  const fuelMonthData = bucketFuelForChart(fuelLogs, "month");
 
   const expenses = await prisma.expense.findMany({
     where: { motorbikeId: bike.id },
     orderBy: { spentAt: "desc" },
   });
   const expenseStats = computeExpenseStats(expenses);
-  const expenseMonthData = bucketExpensesForChart(expenses, "month");
 
   const meta = [bike.make, bike.model, bike.year].filter(Boolean).join(" · ") || "No details yet";
 
@@ -76,9 +73,6 @@ export default async function MotorbikeDetailPage({
               </span>
               <span className="text-sm text-muted">km</span>
             </div>
-            <LinkButton href={ROUTES.analytics(bike.id)} variant="ghost" size="sm" className="mt-2">
-              View analytics →
-            </LinkButton>
           </div>
         </div>
       </header>
@@ -105,9 +99,14 @@ export default async function MotorbikeDetailPage({
       <section>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight">Fuel economy</h2>
-          <LinkButton href={ROUTES.logFuel(bike.id)} size="sm">
-            + Log fuel
-          </LinkButton>
+          <div className="flex items-center gap-2">
+            <LinkButton href={ROUTES.analytics(bike.id)} variant="ghost" size="sm">
+              View analytics →
+            </LinkButton>
+            <LinkButton href={ROUTES.logFuel(bike.id)} size="sm">
+              + Log fuel
+            </LinkButton>
+          </div>
         </div>
         {fuel.logs.length === 0 ? (
           <Card padding="md" className="mt-4 text-sm text-muted">
@@ -143,14 +142,6 @@ export default async function MotorbikeDetailPage({
                 sub="total recorded"
               />
             </div>
-            <Card padding="md" className="mt-4">
-              <LineChart
-                data={fuelMonthData}
-                seriesLabel="km / L"
-                mini
-                emptyLabel="Not enough data yet."
-              />
-            </Card>
             <Card padding="none" className="mt-4 overflow-hidden">
               <ul className="divide-y divide-[var(--border)]">
                 {fuel.logs.slice().reverse().slice(0, 10).map((l) => (
@@ -182,9 +173,18 @@ export default async function MotorbikeDetailPage({
       <section>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight">Expenses</h2>
-          <LinkButton href={ROUTES.logExpense(bike.id)} size="sm">
-            + Log expense
-          </LinkButton>
+          <div className="flex items-center gap-2">
+            <LinkButton
+              href={`${ROUTES.analytics(bike.id)}?tab=expenses`}
+              variant="ghost"
+              size="sm"
+            >
+              View analytics →
+            </LinkButton>
+            <LinkButton href={ROUTES.logExpense(bike.id)} size="sm">
+              + Log expense
+            </LinkButton>
+          </div>
         </div>
         {expenses.length === 0 ? (
           <Card padding="md" className="mt-4 text-sm text-muted">
@@ -215,15 +215,6 @@ export default async function MotorbikeDetailPage({
                 sub={expenseStats.lastSpent ? expenseStats.lastSpent.spentAt.toLocaleDateString() : ""}
               />
             </div>
-            <Card padding="md" className="mt-4">
-              <LineChart
-                data={expenseMonthData}
-                seriesLabel="Spent"
-                yFormat="integer"
-                mini
-                emptyLabel="No spend yet."
-              />
-            </Card>
             <Card padding="none" className="mt-4 overflow-hidden">
               <ul className="divide-y divide-[var(--border)]">
                 {expenses.slice(0, 10).map((e) => (
