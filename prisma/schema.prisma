@@ -66,6 +66,7 @@ model Motorbike {
   serviceEvents ServiceEvent[]
   reminders     ServiceReminder[]
   fuelLogs      FuelLog[]
+  expenses      Expense[]
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
@@ -131,4 +132,22 @@ model ServiceReminder {
 
   @@unique([motorbikeId, type, label])
   @@index([motorbikeId])
+}
+
+/// A non-fuel, non-scheduled-service expense: repair, part, accessory, anything
+/// that cost money and isn't captured by FuelLog or ServiceEvent.
+/// ponytail: single-currency (local). Add a `currency` column when a second
+/// user with different currency actually shows up.
+model Expense {
+  id           String    @id @default(cuid())
+  motorbikeId  String
+  motorbike    Motorbike @relation(fields: [motorbikeId], references: [id], onDelete: Cascade)
+  amount       Float
+  category     String?
+  reason       String?
+  atLifetimeKm Int?
+  spentAt      DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+
+  @@index([motorbikeId, spentAt])
 }

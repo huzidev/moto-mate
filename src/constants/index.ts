@@ -21,6 +21,9 @@ export const ROUTES = {
   reminders: (id: string) => `/dashboard/motorbikes/${id}/reminders`,
   logFuel: (id: string) => `/dashboard/motorbikes/${id}/fuel`,
   editFuel: (id: string, fuelId: string) => `/dashboard/motorbikes/${id}/fuel/${fuelId}`,
+  logExpense: (id: string) => `/dashboard/motorbikes/${id}/expense`,
+  editExpense: (id: string, expenseId: string) =>
+    `/dashboard/motorbikes/${id}/expense/${expenseId}`,
 } as const;
 
 export const VEHICLE_TYPES = {

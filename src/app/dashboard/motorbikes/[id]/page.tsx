@@ -3,12 +3,14 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getBikeWithStats } from "@/lib/motorbikes";
 import { bucketFuelForChart, computeFuelStats } from "@/lib/fuel";
+import { bucketExpensesForChart, computeExpenseStats } from "@/lib/expenses";
 import { ROUTES } from "@/constants";
 import { Card } from "@/components/Card";
 import { LinkButton } from "@/components/Button";
 import { EditLink } from "@/components/EditLink";
 import { ServiceCounterList } from "@/components/ServiceCounterList";
 import { FuelChart } from "@/components/FuelChart";
+import { ExpenseChart } from "@/components/ExpenseChart";
 import { InfoTip } from "@/components/InfoTip";
 import { BackLink } from "@/components/BackLink";
 
@@ -31,6 +33,14 @@ export default async function MotorbikeDetailPage({
   const fuel = computeFuelStats(fuelLogs);
   const fuelMonthData = bucketFuelForChart(fuelLogs, "month");
   const fuelYearData = bucketFuelForChart(fuelLogs, "year");
+
+  const expenses = await prisma.expense.findMany({
+    where: { motorbikeId: bike.id },
+    orderBy: { spentAt: "desc" },
+  });
+  const expenseStats = computeExpenseStats(expenses);
+  const expenseMonthData = bucketExpensesForChart(expenses, "month");
+  const expenseYearData = bucketExpensesForChart(expenses, "year");
 
   const meta = [bike.make, bike.model, bike.year].filter(Boolean).join(" · ") || "No details yet";
 
@@ -144,6 +154,72 @@ export default async function MotorbikeDetailPage({
                     <div className="flex items-center gap-1">
                       <span className="text-xs text-muted">{l.filledAt.toLocaleDateString()}</span>
                       <EditLink href={ROUTES.editFuel(bike.id, l.id)} label="Edit fillup" />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </>
+        )}
+      </section>
+
+      <section>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold tracking-tight">Expenses</h2>
+          <LinkButton href={ROUTES.logExpense(bike.id)} size="sm">
+            + Log expense
+          </LinkButton>
+        </div>
+        {expenses.length === 0 ? (
+          <Card padding="md" className="mt-4 text-sm text-muted">
+            No expenses logged yet. Repairs, parts, accessories — anything that
+            cost money lands here.
+          </Card>
+        ) : (
+          <>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <StatCard
+                label="Total spent"
+                value={expenseStats.totalSpent.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                sub="across all logged"
+                accent
+              />
+              <StatCard
+                label="Entries"
+                value={String(expenseStats.count)}
+                sub={expenseStats.count === 1 ? "expense" : "expenses"}
+              />
+              <StatCard
+                label="Last"
+                value={
+                  expenseStats.lastSpent
+                    ? expenseStats.lastSpent.amount.toLocaleString(undefined, { maximumFractionDigits: 0 })
+                    : "—"
+                }
+                sub={expenseStats.lastSpent ? expenseStats.lastSpent.spentAt.toLocaleDateString() : ""}
+              />
+            </div>
+            <Card padding="md" className="mt-4">
+              <ExpenseChart monthData={expenseMonthData} yearData={expenseYearData} />
+            </Card>
+            <Card padding="none" className="mt-4 overflow-hidden">
+              <ul className="divide-y divide-[var(--border)]">
+                {expenses.slice(0, 10).map((e) => (
+                  <li key={e.id} className="flex items-center justify-between px-5 py-3 text-sm">
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium tabular-nums">
+                        {e.amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </span>
+                      {e.category && (
+                        <span className="ml-2 text-xs text-muted">· {e.category}</span>
+                      )}
+                      {e.reason && (
+                        <span className="ml-2 truncate text-xs text-muted">· {e.reason}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-muted">{e.spentAt.toLocaleDateString()}</span>
+                      <EditLink href={ROUTES.editExpense(bike.id, e.id)} label="Edit expense" />
                     </div>
                   </li>
                 ))}
