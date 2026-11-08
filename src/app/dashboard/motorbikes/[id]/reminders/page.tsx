@@ -11,6 +11,8 @@ import { Card } from "@/components/Card";
 import { FormField, inputClass } from "@/components/FormField";
 import { Select } from "@/components/Select";
 import { SubmitButton } from "@/components/SubmitButton";
+import { Button } from "@/components/Button";
+import { ConfirmModal } from "@/components/Modal";
 
 const updateSchema = z.object({
   id: z.string().min(1),
@@ -100,14 +102,15 @@ export default async function RemindersPage({
     revalidatePath(ROUTES.motorbike(id));
   }
 
-  async function deleteReminder(formData: FormData) {
+  async function deleteReminder(reminderId: string) {
     "use server";
     const s = await auth();
     if (!s?.user?.id) redirect(ROUTES.signin);
     await ensureOwnership(id, s.user.id);
 
-    const rid = String(formData.get("id") ?? "");
-    await prisma.serviceReminder.delete({ where: { id: rid } });
+    await prisma.serviceReminder.deleteMany({
+      where: { id: reminderId, motorbikeId: id },
+    });
     revalidatePath(ROUTES.reminders(id));
     revalidatePath(ROUTES.motorbike(id));
   }
@@ -300,12 +303,25 @@ export default async function RemindersPage({
                 </div>
 
                 <div className="flex justify-end">
-                  <form action={deleteReminder}>
-                    <input type="hidden" name="id" value={r.id} />
-                    <SubmitButton variant="ghost" size="sm" pendingLabel="Deleting…">
+                  <ConfirmModal
+                    title="Delete reminder?"
+                    description={
+                      <>
+                        This clears{" "}
+                        <strong className="text-[var(--foreground)]">
+                          {r.label ?? SERVICE_TYPES[r.type].label}
+                        </strong>
+                        . It can be re-added later.
+                      </>
+                    }
+                    confirmLabel="Delete"
+                    confirmVariant="danger"
+                    onConfirm={deleteReminder.bind(null, r.id)}
+                  >
+                    <Button type="button" variant="ghost" size="sm">
                       Delete reminder
-                    </SubmitButton>
-                  </form>
+                    </Button>
+                  </ConfirmModal>
                 </div>
               </Card>
             );
