@@ -76,6 +76,9 @@ export default async function MotorbikeDetailPage({
               </span>
               <span className="text-sm text-muted">km</span>
             </div>
+            <LinkButton href={ROUTES.analytics(bike.id)} variant="ghost" size="sm" className="mt-2">
+              View analytics →
+            </LinkButton>
           </div>
         </div>
       </header>
@@ -102,18 +105,9 @@ export default async function MotorbikeDetailPage({
       <section>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight">Fuel economy</h2>
-          <div className="flex items-center gap-2">
-            <LinkButton
-              href={`${ROUTES.analytics(bike.id)}`}
-              variant="ghost"
-              size="sm"
-            >
-              View analytics →
-            </LinkButton>
-            <LinkButton href={ROUTES.logFuel(bike.id)} size="sm">
-              + Log fuel
-            </LinkButton>
-          </div>
+          <LinkButton href={ROUTES.logFuel(bike.id)} size="sm">
+            + Log fuel
+          </LinkButton>
         </div>
         {fuel.logs.length === 0 ? (
           <Card padding="md" className="mt-4 text-sm text-muted">
@@ -188,18 +182,9 @@ export default async function MotorbikeDetailPage({
       <section>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight">Expenses</h2>
-          <div className="flex items-center gap-2">
-            <LinkButton
-              href={`${ROUTES.analytics(bike.id)}?tab=expenses`}
-              variant="ghost"
-              size="sm"
-            >
-              View analytics →
-            </LinkButton>
-            <LinkButton href={ROUTES.logExpense(bike.id)} size="sm">
-              + Log expense
-            </LinkButton>
-          </div>
+          <LinkButton href={ROUTES.logExpense(bike.id)} size="sm">
+            + Log expense
+          </LinkButton>
         </div>
         {expenses.length === 0 ? (
           <Card padding="md" className="mt-4 text-sm text-muted">
