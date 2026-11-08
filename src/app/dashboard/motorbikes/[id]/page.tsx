@@ -3,12 +3,13 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getBikeWithStats } from "@/lib/motorbikes";
-import { computeFuelStats } from "@/lib/fuel";
+import { bucketFuelForChart, computeFuelStats } from "@/lib/fuel";
 import { ROUTES } from "@/constants";
 import { Card } from "@/components/Card";
 import { LinkButton } from "@/components/Button";
 import { EditLink } from "@/components/EditLink";
 import { ServiceCounterList } from "@/components/ServiceCounterList";
+import { FuelChart } from "@/components/FuelChart";
 
 export default async function MotorbikeDetailPage({
   params,
@@ -27,6 +28,8 @@ export default async function MotorbikeDetailPage({
     orderBy: { filledAt: "desc" },
   });
   const fuel = computeFuelStats(fuelLogs);
+  const fuelMonthData = bucketFuelForChart(fuelLogs, "month");
+  const fuelYearData = bucketFuelForChart(fuelLogs, "year");
 
   const meta = [bike.make, bike.model, bike.year].filter(Boolean).join(" · ") || "No details yet";
 
@@ -123,6 +126,9 @@ export default async function MotorbikeDetailPage({
                 sub="total recorded"
               />
             </div>
+            <Card padding="md" className="mt-4">
+              <FuelChart monthData={fuelMonthData} yearData={fuelYearData} />
+            </Card>
             <Card padding="none" className="mt-4 overflow-hidden">
               <ul className="divide-y divide-[var(--border)]">
                 {fuel.logs.slice().reverse().slice(0, 10).map((l) => (
