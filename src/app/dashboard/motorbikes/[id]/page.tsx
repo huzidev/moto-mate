@@ -234,7 +234,7 @@ export default async function MotorbikeDetailPage({
               <LineChart
                 data={expenseMonthData}
                 seriesLabel="Spent"
-                format={(y) => y.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                yFormat="integer"
                 mini
                 emptyLabel="No spend yet."
               />

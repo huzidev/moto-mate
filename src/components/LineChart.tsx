@@ -25,6 +25,7 @@ export function LineChart({
   data,
   seriesLabel,
   format,
+  yFormat = "decimal",
   yPrefix = "",
   ySuffix = "",
   height,
@@ -34,7 +35,10 @@ export function LineChart({
 }: {
   data: LineChartPoint[];
   seriesLabel: string;
+  /** Client-only override — don't pass from a Server Component. Use yFormat instead. */
   format?: (y: number) => string;
+  /** Serializable formatter choice. "integer" → commas, no decimals. */
+  yFormat?: "decimal" | "integer";
   yPrefix?: string;
   ySuffix?: string;
   height?: number;
@@ -44,7 +48,11 @@ export function LineChart({
   mini?: boolean;
 }) {
   const gradientId = useId();
-  const fmt = format ?? ((y: number) => y.toFixed(1));
+  const fmt =
+    format ??
+    (yFormat === "integer"
+      ? (y: number) => y.toLocaleString(undefined, { maximumFractionDigits: 0 })
+      : (y: number) => y.toFixed(1));
   const effectiveHeight = height ?? (mini ? 80 : 240);
 
   // A line/area needs at least two non-null points to render anything visible;
