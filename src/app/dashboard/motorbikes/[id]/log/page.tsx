@@ -6,9 +6,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkRemindersForBike } from "@/lib/reminder-notifications";
 import { ROUTES } from "@/constants";
-import { FormField, inputClass } from "@/components/FormField";
-import { SubmitButton } from "@/components/SubmitButton";
 import { Card } from "@/components/Card";
+import { LogTripForm } from "@/components/LogTripForm";
 
 const schema = z.object({
   km: z.coerce.number().int().min(1).max(100_000),
@@ -29,6 +28,12 @@ export default async function LogTripPage({
     select: { id: true, name: true },
   });
   if (!bike) notFound();
+
+  const { _sum } = await prisma.odometerLog.aggregate({
+    where: { motorbikeId: id },
+    _sum: { km: true },
+  });
+  const lifetimeKm = _sum.km ?? 0;
 
   async function logTrip(formData: FormData) {
     "use server";
@@ -77,38 +82,7 @@ export default async function LogTripPage({
       </div>
 
       <Card padding="lg">
-        <form action={logTrip} className="space-y-5">
-          <FormField
-            label="Kilometers ridden"
-            htmlFor="km"
-            required
-            hint="How far you rode since your last log. Odometer resets don't matter — we only store deltas."
-          >
-            <input
-              id="km"
-              name="km"
-              type="number"
-              min={1}
-              max={100000}
-              required
-              autoFocus
-              placeholder="120"
-              className={inputClass}
-            />
-          </FormField>
-          <FormField label="Note" htmlFor="note" hint="Optional — route, conditions, anything useful later.">
-            <input
-              id="note"
-              name="note"
-              maxLength={200}
-              placeholder="City ride, light rain"
-              className={inputClass}
-            />
-          </FormField>
-          <SubmitButton full size="lg" pendingLabel="Saving…">
-            Save log
-          </SubmitButton>
-        </form>
+        <LogTripForm action={logTrip} lifetimeKm={lifetimeKm} />
       </Card>
     </div>
   );
