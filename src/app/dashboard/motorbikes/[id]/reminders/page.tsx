@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -13,6 +12,7 @@ import { Select } from "@/components/Select";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Button } from "@/components/Button";
 import { ConfirmModal } from "@/components/Modal";
+import { BackLink } from "@/components/BackLink";
 
 const updateSchema = z.object({
   id: z.string().min(1),
@@ -169,12 +169,7 @@ export default async function RemindersPage({
     <div className="mx-auto w-full max-w-2xl space-y-8">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <Link
-            href={ROUTES.motorbike(id)}
-            className="text-xs text-muted hover:text-foreground"
-          >
-            ← {bike.name}
-          </Link>
+          <BackLink href={ROUTES.motorbike(id)} label={bike.name} />
           <h1 className="mt-1 text-xl font-semibold tracking-tight">Reminders</h1>
           <p className="mt-1 text-sm text-muted">
             Set service intervals and record when each service was last done. We'll email you

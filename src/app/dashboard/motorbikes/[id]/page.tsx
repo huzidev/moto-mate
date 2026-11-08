@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -11,6 +10,7 @@ import { EditLink } from "@/components/EditLink";
 import { ServiceCounterList } from "@/components/ServiceCounterList";
 import { FuelChart } from "@/components/FuelChart";
 import { InfoTip } from "@/components/InfoTip";
+import { BackLink } from "@/components/BackLink";
 
 export default async function MotorbikeDetailPage({
   params,
@@ -39,12 +39,7 @@ export default async function MotorbikeDetailPage({
   return (
     <div className="space-y-10">
       <header>
-        <Link
-          href={ROUTES.dashboard}
-          className="text-xs text-muted hover:text-foreground"
-        >
-          ← Garage
-        </Link>
+        <BackLink href={ROUTES.dashboard} label="Garage" />
         <div className="mt-3 flex flex-wrap items-end justify-between gap-6">
           <div>
             <div className="flex items-center gap-2">

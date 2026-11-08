@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -8,6 +7,7 @@ import { ROUTES } from "@/constants";
 import { FormField, inputClass } from "@/components/FormField";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Card } from "@/components/Card";
+import { BackLink } from "@/components/BackLink";
 
 const schema = z.object({
   liters: z.coerce.number().positive().max(500),
@@ -68,12 +68,7 @@ export default async function LogFuelPage({
     <div className="mx-auto w-full max-w-lg">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <Link
-            href={ROUTES.motorbike(id)}
-            className="text-xs text-muted hover:text-foreground"
-          >
-            ← {bike.name}
-          </Link>
+          <BackLink href={ROUTES.motorbike(id)} label={bike.name} />
           <h1 className="mt-1 text-xl font-semibold tracking-tight">Log a fillup</h1>
           <p className="mt-1 text-sm text-muted">
             For accurate km/L, fill the tank to full every time you log.

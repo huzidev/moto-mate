@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -8,6 +7,7 @@ import { checkRemindersForBike } from "@/lib/reminder-notifications";
 import { ROUTES } from "@/constants";
 import { Card } from "@/components/Card";
 import { LogTripForm } from "@/components/LogTripForm";
+import { BackLink } from "@/components/BackLink";
 
 const schema = z.object({
   km: z.coerce.number().int().min(1).max(100_000),
@@ -68,17 +68,9 @@ export default async function LogTripPage({
 
   return (
     <div className="mx-auto w-full max-w-lg">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Log a trip</h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">{bike.name}</p>
-        </div>
-        <Link
-          href={ROUTES.motorbike(id)}
-          className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
-        >
-          Cancel
-        </Link>
+      <div className="mb-6">
+        <BackLink href={ROUTES.motorbike(id)} label={bike.name} />
+        <h1 className="mt-1 text-xl font-semibold tracking-tight">Log a trip</h1>
       </div>
 
       <Card padding="lg">

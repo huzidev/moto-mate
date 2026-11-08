@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -11,6 +10,7 @@ import { FormField, inputClass } from "@/components/FormField";
 import { Select } from "@/components/Select";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Card } from "@/components/Card";
+import { BackLink } from "@/components/BackLink";
 
 const schema = z.object({
   type: z.enum(["OIL_CHANGE", "TUNE", "CUSTOM"]),
@@ -82,9 +82,7 @@ export default async function EditServicePage({
   return (
     <div className="mx-auto w-full max-w-lg">
       <div className="mb-6">
-        <Link href={ROUTES.motorbike(id)} className="text-xs text-muted hover:text-foreground">
-          ← {event.motorbike.name}
-        </Link>
+        <BackLink href={ROUTES.motorbike(id)} label={event.motorbike.name} />
         <h1 className="mt-1 text-xl font-semibold tracking-tight">Edit service</h1>
       </div>
 

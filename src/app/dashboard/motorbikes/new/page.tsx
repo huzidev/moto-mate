@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
@@ -8,6 +7,7 @@ import { ROUTES } from "@/constants";
 import { FormField, inputClass } from "@/components/FormField";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Card } from "@/components/Card";
+import { BackLink } from "@/components/BackLink";
 
 const schema = z.object({
   name: z.string().trim().min(1).max(60),
@@ -50,19 +50,12 @@ export default async function NewMotorbikePage() {
 
   return (
     <div className="mx-auto w-full max-w-lg">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Add motorbike</h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            Just the essentials. You can fill in more later.
-          </p>
-        </div>
-        <Link
-          href={ROUTES.dashboard}
-          className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
-        >
-          Cancel
-        </Link>
+      <div className="mb-6">
+        <BackLink href={ROUTES.dashboard} label="Garage" />
+        <h1 className="mt-1 text-xl font-semibold tracking-tight">Add motorbike</h1>
+        <p className="mt-1 text-sm text-[var(--muted)]">
+          Just the essentials. You can fill in more later.
+        </p>
       </div>
 
       <Card padding="lg">

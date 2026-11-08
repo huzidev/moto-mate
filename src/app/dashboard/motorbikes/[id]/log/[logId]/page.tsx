@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -8,6 +7,7 @@ import { ROUTES } from "@/constants";
 import { FormField, inputClass } from "@/components/FormField";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Card } from "@/components/Card";
+import { BackLink } from "@/components/BackLink";
 
 const schema = z.object({
   km: z.coerce.number().int().min(1).max(100_000),
@@ -58,9 +58,7 @@ export default async function EditTripPage({
   return (
     <div className="mx-auto w-full max-w-lg">
       <div className="mb-6">
-        <Link href={ROUTES.motorbike(id)} className="text-xs text-muted hover:text-foreground">
-          ← {log.motorbike.name}
-        </Link>
+        <BackLink href={ROUTES.motorbike(id)} label={log.motorbike.name} />
         <h1 className="mt-1 text-xl font-semibold tracking-tight">Edit trip</h1>
       </div>
 
