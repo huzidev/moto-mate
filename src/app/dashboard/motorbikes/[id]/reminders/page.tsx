@@ -8,8 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { clearNotificationsForServiceEvent } from "@/lib/reminder-notifications";
 import { ROUTES, SERVICE_TYPES } from "@/constants";
 import { Card } from "@/components/Card";
-import { FormField, inputClass } from "@/components/FormField";
-import { Button } from "@/components/Button";
+import { FormField, inputClass, selectClass } from "@/components/FormField";
+import { SubmitButton } from "@/components/SubmitButton";
 
 const updateSchema = z.object({
   id: z.string().min(1),
@@ -244,9 +244,9 @@ export default async function RemindersPage({
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <Button type="submit" size="sm">
+                    <SubmitButton size="sm" pendingLabel="Saving…">
                       Save
-                    </Button>
+                    </SubmitButton>
                   </div>
                 </form>
 
@@ -292,18 +292,18 @@ export default async function RemindersPage({
                         className={inputClass}
                       />
                     </FormField>
-                    <Button type="submit" size="md">
+                    <SubmitButton size="md" pendingLabel="Marking…">
                       Mark done
-                    </Button>
+                    </SubmitButton>
                   </form>
                 </div>
 
                 <div className="flex justify-end">
                   <form action={deleteReminder}>
                     <input type="hidden" name="id" value={r.id} />
-                    <Button type="submit" variant="ghost" size="sm">
+                    <SubmitButton variant="ghost" size="sm" pendingLabel="Deleting…">
                       Delete reminder
-                    </Button>
+                    </SubmitButton>
                   </form>
                 </div>
               </Card>
@@ -322,7 +322,7 @@ export default async function RemindersPage({
                   id="type"
                   name="type"
                   defaultValue="CUSTOM"
-                  className={inputClass}
+                  className={selectClass}
                 >
                   <option value="OIL_CHANGE">Oil change</option>
                   <option value="TUNE">Tune / major service</option>
@@ -364,9 +364,9 @@ export default async function RemindersPage({
                 />
               </FormField>
             </div>
-            <Button type="submit" size="md">
+            <SubmitButton size="md" pendingLabel="Adding…">
               + Add reminder
-            </Button>
+            </SubmitButton>
           </form>
         </Card>
       </section>

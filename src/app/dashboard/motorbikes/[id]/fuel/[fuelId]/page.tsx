@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ROUTES } from "@/constants";
 import { FormField, inputClass } from "@/components/FormField";
-import { Button } from "@/components/Button";
+import { SubmitButton } from "@/components/SubmitButton";
 import { Card } from "@/components/Card";
 
 const schema = z.object({
@@ -148,9 +148,9 @@ export default async function EditFuelPage({
             />
           </FormField>
 
-          <Button type="submit" full size="lg">
+          <SubmitButton full size="lg" pendingLabel="Saving…">
             Save changes
-          </Button>
+          </SubmitButton>
         </form>
       </Card>
     </div>

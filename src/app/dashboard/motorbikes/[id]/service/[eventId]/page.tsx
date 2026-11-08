@@ -7,8 +7,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { clearNotificationsForServiceEvent } from "@/lib/reminder-notifications";
 import { ROUTES, SERVICE_TYPES } from "@/constants";
-import { FormField, inputClass } from "@/components/FormField";
-import { Button } from "@/components/Button";
+import { FormField, inputClass, selectClass } from "@/components/FormField";
+import { SubmitButton } from "@/components/SubmitButton";
 import { Card } from "@/components/Card";
 
 const schema = z.object({
@@ -91,7 +91,7 @@ export default async function EditServicePage({
         <form action={updateService} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Service type" htmlFor="type" required>
-              <select id="type" name="type" defaultValue={event.type} className={inputClass}>
+              <select id="type" name="type" defaultValue={event.type} className={selectClass}>
                 <option value="OIL_CHANGE">{SERVICE_TYPES.OIL_CHANGE.label}</option>
                 <option value="TUNE">{SERVICE_TYPES.TUNE.label}</option>
                 <option value="CUSTOM">{SERVICE_TYPES.CUSTOM.label}</option>
@@ -146,9 +146,9 @@ export default async function EditServicePage({
             />
           </FormField>
 
-          <Button type="submit" full size="lg">
+          <SubmitButton full size="lg" pendingLabel="Saving…">
             Save changes
-          </Button>
+          </SubmitButton>
         </form>
       </Card>
     </div>

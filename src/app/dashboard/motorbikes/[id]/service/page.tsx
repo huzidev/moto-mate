@@ -7,8 +7,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { clearNotificationsForServiceEvent } from "@/lib/reminder-notifications";
 import { ROUTES, SERVICE_TYPES } from "@/constants";
-import { FormField, inputClass } from "@/components/FormField";
-import { Button } from "@/components/Button";
+import { FormField, inputClass, selectClass } from "@/components/FormField";
+import { SubmitButton } from "@/components/SubmitButton";
 import { Card } from "@/components/Card";
 
 const schema = z.object({
@@ -101,7 +101,7 @@ export default async function RecordServicePage({
                 id="type"
                 name="type"
                 defaultValue="OIL_CHANGE"
-                className={inputClass}
+                className={selectClass}
               >
                 <option value="OIL_CHANGE">{SERVICE_TYPES.OIL_CHANGE.label}</option>
                 <option value="TUNE">{SERVICE_TYPES.TUNE.label}</option>
@@ -155,9 +155,9 @@ export default async function RecordServicePage({
             />
           </FormField>
 
-          <Button type="submit" full size="lg">
+          <SubmitButton full size="lg" pendingLabel="Saving…">
             Save service
-          </Button>
+          </SubmitButton>
         </form>
       </Card>
     </div>

@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { seedDefaultReminders } from "@/lib/motorbikes";
 import { ROUTES } from "@/constants";
 import { FormField, inputClass } from "@/components/FormField";
-import { Button } from "@/components/Button";
+import { SubmitButton } from "@/components/SubmitButton";
 import { Card } from "@/components/Card";
 
 const schema = z.object({
@@ -109,9 +109,9 @@ export default async function NewMotorbikePage() {
             </FormField>
           </div>
 
-          <Button type="submit" full size="lg">
+          <SubmitButton full size="lg" pendingLabel="Saving…">
             Save motorbike
-          </Button>
+          </SubmitButton>
         </form>
       </Card>
     </div>
