@@ -8,12 +8,7 @@ import { ROUTES } from "@/constants";
 import { Card } from "@/components/Card";
 import { LinkButton } from "@/components/Button";
 import { EditLink } from "@/components/EditLink";
-
-const statusStyle = {
-  due: "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300",
-  soon: "bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300",
-  ok: "bg-[var(--surface-muted)] text-[var(--muted)]",
-};
+import { ServiceCounterList } from "@/components/ServiceCounterList";
 
 export default async function MotorbikeDetailPage({
   params,
@@ -75,50 +70,16 @@ export default async function MotorbikeDetailPage({
             Configure
           </LinkButton>
         </div>
-        {bike.counters.length === 0 ? (
-          <Card padding="md" className="mt-4 text-sm text-[var(--muted)]">
-            No active reminders. Add some to get notified.
-          </Card>
-        ) : (
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {bike.counters.map((c) => {
-              const pct = Math.min(100, Math.round((c.sinceKm / c.reminder.intervalKm) * 100));
-              return (
-                <li key={c.reminder.id}>
-                  <Card padding="md">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{c.typeLabel}</span>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${statusStyle[c.status]}`}
-                      >
-                        {c.status}
-                      </span>
-                    </div>
-                    <div className="mt-3 text-xs text-[var(--muted)]">
-                      <span className="tabular-nums text-[var(--foreground)]">
-                        {c.sinceKm.toLocaleString()}
-                      </span>{" "}
-                      / {c.reminder.intervalKm.toLocaleString()} km
-                      {c.sinceDays != null && <> · {c.sinceDays}d</>}
-                    </div>
-                    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface-muted)]">
-                      <div
-                        className={`h-full transition-all ${
-                          c.status === "due"
-                            ? "bg-red-500"
-                            : c.status === "soon"
-                              ? "bg-brand-500"
-                              : "bg-[var(--border-strong)]"
-                        }`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  </Card>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <ServiceCounterList
+          counters={bike.counters.map((c) => ({
+            id: c.reminder.id,
+            typeLabel: c.typeLabel,
+            intervalKm: c.reminder.intervalKm,
+            sinceKm: c.sinceKm,
+            sinceDays: c.sinceDays,
+            status: c.status,
+          }))}
+        />
       </section>
 
       <section>

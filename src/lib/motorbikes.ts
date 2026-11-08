@@ -39,6 +39,15 @@ export async function getBikeWithStats(bikeId: string, userId: string) {
     };
   });
 
+  // Urgent first so the "Show more" cutoff never hides a due reminder behind
+  // three healthy ones.
+  const statusRank = { due: 0, soon: 1, ok: 2 } as const;
+  counters.sort((a, b) => {
+    const s = statusRank[a.status] - statusRank[b.status];
+    if (s !== 0) return s;
+    return a.reminder.intervalKm - a.sinceKm - (b.reminder.intervalKm - b.sinceKm);
+  });
+
   return { ...bike, lifetimeKm, counters };
 }
 
