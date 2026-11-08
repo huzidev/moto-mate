@@ -12,6 +12,13 @@ import { ServiceCounterList } from "@/components/ServiceCounterList";
 import { LineChart } from "@/components/LineChart";
 import { InfoTip } from "@/components/InfoTip";
 import { BackLink } from "@/components/BackLink";
+import { DeleteRowButton } from "@/components/DeleteRowButton";
+import {
+  deleteExpense,
+  deleteFuelLog,
+  deleteOdometerLog,
+  deleteServiceEvent,
+} from "@/lib/log-actions";
 
 export default async function MotorbikeDetailPage({
   params,
@@ -165,6 +172,10 @@ export default async function MotorbikeDetailPage({
                     <div className="flex items-center gap-1">
                       <span className="text-xs text-muted">{l.filledAt.toLocaleDateString()}</span>
                       <EditLink href={ROUTES.editFuel(bike.id, l.id)} label="Edit fillup" />
+                      <DeleteRowButton
+                        action={deleteFuelLog.bind(null, l.id)}
+                        entityLabel="fillup"
+                      />
                     </div>
                   </li>
                 ))}
@@ -246,6 +257,10 @@ export default async function MotorbikeDetailPage({
                     <div className="flex items-center gap-1">
                       <span className="text-xs text-muted">{e.spentAt.toLocaleDateString()}</span>
                       <EditLink href={ROUTES.editExpense(bike.id, e.id)} label="Edit expense" />
+                      <DeleteRowButton
+                        action={deleteExpense.bind(null, e.id)}
+                        entityLabel="expense"
+                      />
                     </div>
                   </li>
                 ))}
@@ -282,6 +297,10 @@ export default async function MotorbikeDetailPage({
                       {l.loggedAt.toLocaleDateString()}
                     </span>
                     <EditLink href={ROUTES.editTrip(bike.id, l.id)} label="Edit trip" />
+                    <DeleteRowButton
+                      action={deleteOdometerLog.bind(null, l.id)}
+                      entityLabel="trip"
+                    />
                   </div>
                 </li>
               ))}
@@ -319,6 +338,10 @@ export default async function MotorbikeDetailPage({
                       {e.performedAt.toLocaleDateString()}
                     </span>
                     <EditLink href={ROUTES.editService(bike.id, e.id)} label="Edit service" />
+                    <DeleteRowButton
+                      action={deleteServiceEvent.bind(null, e.id)}
+                      entityLabel="service entry"
+                    />
                   </div>
                 </li>
               ))}
