@@ -47,7 +47,10 @@ export default async function MotorbikeDetailPage({
         </Link>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">{bike.name}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-semibold tracking-tight">{bike.name}</h1>
+              <EditLink href={ROUTES.editMotorbike(bike.id)} label="Edit bike" />
+            </div>
             <p className="mt-1 text-sm text-muted">{meta}</p>
           </div>
           <div className="text-right">

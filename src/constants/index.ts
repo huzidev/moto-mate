@@ -14,6 +14,7 @@ export const ROUTES = {
   profile: "/dashboard/profile",
   addMotorbike: "/dashboard/motorbikes/new",
   motorbike: (id: string) => `/dashboard/motorbikes/${id}`,
+  editMotorbike: (id: string) => `/dashboard/motorbikes/${id}/edit`,
   logTrip: (id: string) => `/dashboard/motorbikes/${id}/log`,
   editTrip: (id: string, logId: string) => `/dashboard/motorbikes/${id}/log/${logId}`,
   recordService: (id: string) => `/dashboard/motorbikes/${id}/service`,
