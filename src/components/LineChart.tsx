@@ -47,7 +47,11 @@ export function LineChart({
   const fmt = format ?? ((y: number) => y.toFixed(1));
   const effectiveHeight = height ?? (mini ? 80 : 240);
 
-  if (data.length === 0) {
+  // A line/area needs at least two non-null points to render anything visible;
+  // a single point just disappears. Treat that as empty so users aren't staring
+  // at a mystery blank card.
+  const nonNullCount = data.reduce((n, p) => n + (p.y != null ? 1 : 0), 0);
+  if (nonNullCount < 2) {
     return (
       <div
         className="flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--muted)]"
