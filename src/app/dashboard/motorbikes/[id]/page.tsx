@@ -310,7 +310,12 @@ export default async function MotorbikeDetailPage({
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold tracking-tight">Service history</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold tracking-tight">Service history</h2>
+          <LinkButton href={ROUTES.recordService(bike.id)} size="sm">
+            + Log service
+          </LinkButton>
+        </div>
         {bike.serviceEvents.length === 0 ? (
           <Card padding="md" className="mt-4 text-sm text-[var(--muted)]">
             No services recorded yet. Mark one done on the reminders page.

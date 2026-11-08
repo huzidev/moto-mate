@@ -18,6 +18,7 @@ export const ROUTES = {
   analytics: (id: string) => `/dashboard/motorbikes/${id}/analytics`,
   logTrip: (id: string) => `/dashboard/motorbikes/${id}/log`,
   editTrip: (id: string, logId: string) => `/dashboard/motorbikes/${id}/log/${logId}`,
+  recordService: (id: string) => `/dashboard/motorbikes/${id}/service`,
   editService: (id: string, eventId: string) => `/dashboard/motorbikes/${id}/service/${eventId}`,
   reminders: (id: string) => `/dashboard/motorbikes/${id}/reminders`,
   logFuel: (id: string) => `/dashboard/motorbikes/${id}/fuel`,
