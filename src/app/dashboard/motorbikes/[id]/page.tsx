@@ -10,6 +10,7 @@ import { LinkButton } from "@/components/Button";
 import { EditLink } from "@/components/EditLink";
 import { ServiceCounterList } from "@/components/ServiceCounterList";
 import { FuelChart } from "@/components/FuelChart";
+import { InfoTip } from "@/components/InfoTip";
 
 export default async function MotorbikeDetailPage({
   params,
@@ -50,17 +51,18 @@ export default async function MotorbikeDetailPage({
             <p className="mt-1 text-sm text-muted">{meta}</p>
           </div>
           <div className="text-right">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+            <div className="flex items-center justify-end gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
               Lifetime mileage
+              <InfoTip label="About lifetime mileage">
+                Built from {tripCount} {tripCount === 1 ? "trip log" : "trip logs"}.
+                Odometer resets don't affect this number.
+              </InfoTip>
             </div>
             <div className="mt-1 flex items-baseline justify-end gap-1.5">
               <span className="text-5xl font-semibold tabular-nums text-brand-500">
                 {bike.lifetimeKm.toLocaleString()}
               </span>
               <span className="text-sm text-muted">km</span>
-            </div>
-            <div className="mt-0.5 text-xs text-muted">
-              across {tripCount} {tripCount === 1 ? "log" : "logs"}
             </div>
           </div>
         </div>
