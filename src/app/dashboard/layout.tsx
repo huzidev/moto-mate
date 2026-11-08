@@ -2,11 +2,11 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth, signOut } from "@/lib/auth";
 import { APP, ROUTES } from "@/constants";
-import { Button } from "@/components/Button";
+import { UserMenu } from "@/components/UserMenu";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  if (!session?.user) redirect(ROUTES.signin);
+  if (!session?.user?.email) redirect(ROUTES.signin);
 
   async function doSignOut() {
     "use server";
@@ -23,16 +23,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </span>
             {APP.name}
           </Link>
-          <div className="flex items-center gap-3">
-            <span className="hidden text-xs text-[var(--muted)] sm:inline">
-              {session.user.name ?? session.user.email}
-            </span>
-            <form action={doSignOut}>
-              <Button variant="ghost" size="sm" type="submit">
-                Sign out
-              </Button>
-            </form>
-          </div>
+          <UserMenu
+            name={session.user.name ?? null}
+            email={session.user.email}
+            signOutAction={doSignOut}
+          />
         </div>
       </header>
       <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">{children}</div>

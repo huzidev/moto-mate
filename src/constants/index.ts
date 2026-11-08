@@ -11,6 +11,7 @@ export const ROUTES = {
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
   dashboard: "/dashboard",
+  profile: "/dashboard/profile",
   addMotorbike: "/dashboard/motorbikes/new",
   motorbike: (id: string) => `/dashboard/motorbikes/${id}`,
   logTrip: (id: string) => `/dashboard/motorbikes/${id}/log`,
